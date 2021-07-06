@@ -30,9 +30,3 @@ export enum WSOpCodes {
     VOICE_CONNECTION_ERROR = 6,
     AUDIO_PLAYER_ERROR = 7
 }
-
-export enum WSOpCodeClient {
-    YOUTUBE_SEARCH = 0,
-    LOAD_TRACK = 1,
-    JOIN_VOICE = 2
-}
