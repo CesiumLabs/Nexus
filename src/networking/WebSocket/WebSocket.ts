@@ -88,8 +88,8 @@ class WebSocket {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     send(ws: WS, data: any) {
-        // eslint-disable-line @typescript-eslint/no-explicit-any
         return ws.send(JSON.stringify(data), Util.noop);
     }
 

@@ -5,8 +5,8 @@ import { TrackInitOptions } from "../types/types";
 class Util extends null {
     private constructor() {} // eslint-disable-line @typescript-eslint/no-empty-function
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static parse<T>(data: any): T {
-        // eslint-disable-line @typescript-eslint/no-explicit-any
         try {
             return JSON.parse(data);
         } catch {
