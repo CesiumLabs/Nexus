@@ -82,6 +82,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     disconnect() {
         try {
             this.audioPlayer.stop(true);
+            this.queue.tracks = [];
             this.voiceConnection.destroy();
         } catch {} // eslint-disable-line no-empty
     }
