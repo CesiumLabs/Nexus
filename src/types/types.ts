@@ -20,3 +20,8 @@ export interface TrackInitOptions {
     created_at: Date;
     extractor: string;
 }
+
+export interface PlayerPatchData {
+    paused?: boolean;
+    volume?: number;
+}

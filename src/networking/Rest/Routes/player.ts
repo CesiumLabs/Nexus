@@ -2,7 +2,8 @@ import { AudioPlayerStatus } from "@discordjs/voice";
 import { Snowflake } from "discord-api-types";
 import { Router } from "express";
 import { Track } from "../../../audio/Track";
-import { TrackInitOptions } from "../../../types/types";
+import { PlayerPatchData, TrackInitOptions } from "../../../types/types";
+import { WSOpCodes } from "../../../Utils/Constants";
 import { Util } from "../../../Utils/Util";
 import clients from "../../WebSocket/clients";
 
@@ -43,7 +44,7 @@ router.post("/:clientID/:guildID/player", async (req, res) => {
     }
 });
 
-router.get("/:clientID/:guildID/player/volume", (req, res) => {
+router.patch("/:clientID/:guildID/player", (req, res) => {
     const { clientID, guildID } = req.params;
 
     if (!clientID || !guildID) {
@@ -61,33 +62,38 @@ router.get("/:clientID/:guildID/player/volume", (req, res) => {
         return res.status(404).json({ error: `subscription is not available for ${guildID}` });
     }
 
-    return res.json({ volume: subscription.volume });
-});
+    const data = req.body.data as PlayerPatchData;
+    const oldState = {
+        volume: subscription.volume,
+        paused: subscription.paused
+    };
 
-router.post("/:clientID/:guildID/player/volume", (req, res) => {
-    const { clientID, guildID } = req.params;
-
-    if (!clientID || !guildID) {
-        return res.status(400).json({ error: 'missing "client" or "guild" param' });
+    if ("paused" in data) {
+        // eslint-disable-next-line no-extra-boolean-cast
+        if (oldState.paused !== Boolean(data.paused)) Boolean(data.paused) ? subscription.pause() : subscription.resume();
     }
 
-    const client = clients.find((c) => c.id === clientID);
-
-    if (!client) {
-        return res.status(403).json({ error: `client ${clientID} has no active websocket connection` });
+    if ("volume" in data) {
+        const vol = parseInt(data.volume as unknown as string);
+        if (oldState.volume !== vol && !isNaN(vol) && Number.isFinite(vol) && vol > 0) subscription.setVolume(vol);
     }
 
-    const subscription = client.subscriptions.get(guildID as Snowflake);
-    if (!subscription) {
-        return res.status(404).json({ error: `subscription is not available for ${guildID}` });
-    }
+    const payloadData = {
+        old_state: oldState,
+        new_state: {
+            volume: subscription.volume,
+            paused: subscription.paused
+        }
+    };
 
-    const volumeState = req.body.volume ?? -1;
-    if (volumeState < 0 || !Number.isFinite(volumeState)) return res.status(400).send({ error: "invalid volume amount" });
+    subscription.client.socket.send(
+        JSON.stringify({
+            op: WSOpCodes.QUEUE_STATE_UPDATE,
+            d: payloadData
+        })
+    );
 
-    const success = subscription.setVolume(volumeState);
-
-    return res.json({ volume: volumeState, success });
+    return res.json(payloadData);
 });
 
 router.delete("/:clientID/:guildID/player", (req, res) => {
@@ -180,7 +186,59 @@ router.delete("/:clientID/:guildID/:channelID/subscription", (req, res) => {
 
     subscription.disconnect();
 
+    client.subscriptions.delete(guildID as Snowflake);
+
     return res.status(204).json();
+});
+
+router.get("/:clientID/:guildID/player/playing", (req, res) => {
+    const { clientID, guildID } = req.params;
+
+    if (!clientID || !guildID) {
+        return res.status(400).json({ error: 'missing "client" or "guild" param' });
+    }
+
+    const client = clients.find((c) => c.id === clientID);
+
+    if (!client) {
+        return res.status(403).json({ error: `client ${clientID} has no active websocket connection` });
+    }
+
+    const subscription = client.subscriptions.get(guildID as Snowflake);
+    if (!subscription) {
+        return res.status(404).json({ error: `subscription is not available for ${guildID}` });
+    }
+
+    return res.json({
+        current: subscription.queue.playing.toJSON(),
+        next: subscription.queue.tracks[0]?.toJSON() ?? null,
+        stream_time: subscription.streamTime
+    });
+});
+
+router.get("/:clientID/:guildID/player/tracks", (req, res) => {
+    const { clientID, guildID } = req.params;
+
+    if (!clientID || !guildID) {
+        return res.status(400).json({ error: 'missing "client" or "guild" param' });
+    }
+
+    const client = clients.find((c) => c.id === clientID);
+
+    if (!client) {
+        return res.status(403).json({ error: `client ${clientID} has no active websocket connection` });
+    }
+
+    const subscription = client.subscriptions.get(guildID as Snowflake);
+    if (!subscription) {
+        return res.status(404).json({ error: `subscription is not available for ${guildID}` });
+    }
+
+    return res.json({
+        current: subscription.queue.playing?.toJSON() ?? null,
+        tracks: subscription.queue.tracks.map((m) => m.toJSON()),
+        stream_time: subscription.streamTime
+    });
 });
 
 export default router;

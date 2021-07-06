@@ -4,6 +4,7 @@ import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Track } from "./Track";
 import { Queue } from "./Queue";
 import { Snowflake } from "discord-api-types";
+import type { Client } from "./Client";
 
 export interface VoiceEvents {
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -23,7 +24,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     public audioResource: AudioResource<Track> = null;
     public queue = new Queue(this.voiceConnection.joinConfig.guildId as Snowflake, this);
 
-    constructor(public readonly voiceConnection: VoiceConnection) {
+    constructor(public readonly voiceConnection: VoiceConnection, public readonly client: Client) {
         super();
         this.audioPlayer = createAudioPlayer();
 

@@ -44,7 +44,7 @@ class Client {
 
         entersState(connection, VoiceConnectionStatus.Ready, 30000)
             .then((conn) => {
-                const subscription = new SubscriptionManager(conn);
+                const subscription = new SubscriptionManager(conn, this);
                 this.bindEvents(subscription);
                 this.subscriptions.set(guild, subscription);
                 this.socket.send(
