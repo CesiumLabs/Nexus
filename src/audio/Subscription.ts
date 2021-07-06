@@ -1,7 +1,9 @@
-import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, entersState, VoiceConnection, VoiceConnectionStatus, VoiceConnectionDisconnectReason } from "@discordjs/voice";
+import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, entersState, VoiceConnection, VoiceConnectionStatus, VoiceConnectionDisconnectReason, createAudioResource, StreamType } from "@discordjs/voice";
 import { Util } from "../Utils/Util";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Track } from "./Track";
+import { Queue } from "./Queue";
+import { Snowflake } from "discord-api-types";
 
 export interface VoiceEvents {
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -9,6 +11,8 @@ export interface VoiceEvents {
     connectionError: (error: Error) => any;
     start: (resource: AudioResource<Track>) => any;
     finish: (resource: AudioResource<Track>) => any;
+    trackAdd: (track: Track) => any;
+    stop: () => any;
     /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
@@ -17,6 +21,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     private readyLock = false;
     public paused = false;
     public audioResource: AudioResource<Track> = null;
+    public queue = new Queue(this.voiceConnection.joinConfig.guildId as Snowflake, this);
 
     constructor(public readonly voiceConnection: VoiceConnection) {
         super();
@@ -57,6 +62,9 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
                 if (!this.paused) {
                     void this.emit("finish", this.audioResource);
                     this.audioResource = null;
+                    const nextTrack = this.queue.tracks.shift();
+                    if (nextTrack) this.playStream(nextTrack, true);
+                    else this.emit("stop");
                 }
             }
         });
@@ -106,13 +114,29 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
         return this.audioResource.playbackDuration;
     }
 
-    async playStream(resource: AudioResource<Track> = this.audioResource) {
-        if (!resource) throw new Error("Audio resource is not available!");
-        if (!this.audioResource) this.audioResource = resource;
+    async playStream(track: Track = this.queue.playing, play = false) {
+        if (!track) throw new Error("Audio resource is not available!");
+
+        if (!play) {
+            this.queue.addTrack(track);
+            return this;
+        }
+
         if (this.voiceConnection.state.status !== VoiceConnectionStatus.Ready) await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 30000);
+        const resource = this.createAudioResource(track);
+        if (!this.audioResource) this.audioResource = resource;
         this.audioPlayer.play(resource);
 
         return this;
+    }
+
+    createAudioResource(track: Track): AudioResource<Track> {
+        const stream = track.createStream();
+        return createAudioResource(stream, {
+            metadata: track,
+            inlineVolume: true,
+            inputType: StreamType.Arbitrary
+        });
     }
 }
 

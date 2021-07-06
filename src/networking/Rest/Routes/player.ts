@@ -1,3 +1,4 @@
+import { AudioPlayerStatus } from "@discordjs/voice";
 import { Snowflake } from "discord-api-types";
 import { Router } from "express";
 import { Track } from "../../../audio/Track";
@@ -33,9 +34,10 @@ router.post("/:clientID/:guildID/player", async (req, res) => {
     const song = new Track(info as TrackInitOptions);
 
     try {
-        const stream = song.createStream();
         res.json(info);
-        subscription.playStream(stream);
+        subscription.queue.addTrack(song);
+        if (subscription.audioPlayer.state.status !== AudioPlayerStatus.Idle) return;
+        subscription.playStream(subscription.queue.tracks.shift(), true);
     } catch {
         res.status(500).send({ error: "could not play the track" });
     }

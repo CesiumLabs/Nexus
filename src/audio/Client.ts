@@ -104,6 +104,22 @@ class Client {
                         d: err.message || `${err}`
                     })
                 );
+            })
+            .on("trackAdd", (track) => {
+                this.socket.send(
+                    JSON.stringify({
+                        op: WSOpCodes.TRACK_ADD,
+                        d: track?.toJSON() || {}
+                    })
+                );
+            })
+            .on("stop", () => {
+                this.socket.send(
+                    JSON.stringify({
+                        op: WSOpCodes.QUEUE_END,
+                        d: {}
+                    })
+                );
             });
     }
 }

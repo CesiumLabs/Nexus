@@ -1,7 +1,6 @@
 import ytdlPromise, { raw as ytdl } from "youtube-dl-exec";
 import { TrackInitOptions } from "../types/types";
-import { StreamType } from "@discordjs/voice";
-import { createAudioResource, AudioResource } from "@discordjs/voice";
+import type { Readable } from "stream";
 
 class Track {
     public readonly title = this.data.title;
@@ -13,7 +12,7 @@ class Track {
 
     constructor(public readonly data: TrackInitOptions) {}
 
-    createStream(): AudioResource<Track> {
+    createStream(): Readable {
         const ytdlProcess = ytdl(
             this.url,
             {
@@ -35,11 +34,7 @@ class Track {
             stream.resume();
         });
 
-        return createAudioResource(stream, {
-            metadata: this,
-            inlineVolume: true,
-            inputType: StreamType.Arbitrary
-        });
+        return stream;
     }
 
     static async getInfo(url: string) {
