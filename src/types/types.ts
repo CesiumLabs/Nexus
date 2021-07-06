@@ -1,6 +1,7 @@
 export interface NexusConstructOptions {
     password?: string;
-    port?: number;
+    wsport: number;
+    restport: number;
     host?: string;
 }
 
