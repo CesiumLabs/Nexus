@@ -4,8 +4,10 @@ import { WebSocket } from "./networking/WebSocket/WebSocket";
 import { RESTServer } from "./networking/Rest/RESTServer";
 
 interface NexusEvents {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     wsLog: (message: string) => any;
     restLog: (message: string) => any;
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
 class Nexus extends EventEmitter<NexusEvents> {

@@ -6,7 +6,7 @@ export interface NexusConstructOptions {
 
 export interface MessagePayload {
     op?: number;
-    d?: any;
+    d?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     t?: string;
 }
 

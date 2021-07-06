@@ -2,12 +2,12 @@ import { Snowflake } from "discord-api-types";
 import { Router } from "express";
 import { Track } from "../../../audio/Track";
 import { TrackInitOptions } from "../../../types/types";
+import { Util } from "../../../Utils/Util";
 import clients from "../../WebSocket/clients";
 
 const router = Router();
 
 router.post("/:clientID/:guildID/player", async (req, res) => {
-    console.log("play request");
     const { clientID, guildID } = req.params;
 
     if (!clientID || !guildID) {
@@ -27,7 +27,7 @@ router.post("/:clientID/:guildID/player", async (req, res) => {
 
     const track = req.body.track as TrackInitOptions;
     if (!track || !track.url) return res.status(400).json({ error: "track was not found in the request payload" });
-    const info = await Track.getInfo(track.url).catch(() => {});
+    const info = await Track.getInfo(track.url).catch(Util.noop);
     if (!info || (info as { error: string }).error) return res.status(404).json({ error: "track not found" });
 
     const song = new Track(info as TrackInitOptions);
@@ -36,7 +36,7 @@ router.post("/:clientID/:guildID/player", async (req, res) => {
         const stream = song.createStream();
         res.json(info);
         subscription.playStream(stream);
-    } catch (e) {
+    } catch {
         res.status(500).send({ error: "could not play the track" });
     }
 });

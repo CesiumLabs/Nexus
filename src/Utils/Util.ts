@@ -3,9 +3,10 @@ import YouTube from "youtube-sr";
 import { TrackInitOptions } from "../types/types";
 
 class Util extends null {
-    private constructor() {}
+    private constructor() {} // eslint-disable-line @typescript-eslint/no-empty-function
 
     static parse<T>(data: any): T {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
         try {
             return JSON.parse(data);
         } catch {
@@ -13,7 +14,7 @@ class Util extends null {
         }
     }
 
-    static noop() {}
+    static noop() {} // eslint-disable-line @typescript-eslint/no-empty-function
 
     static wait(t: number): Promise<void> {
         return new Promise((r) => setTimeout(r, t));

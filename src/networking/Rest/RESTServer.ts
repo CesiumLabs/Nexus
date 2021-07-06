@@ -4,7 +4,7 @@ import PlayerRoutes from "./Routes/player";
 import TrackRoutes from "./Routes/track";
 
 class RESTServer {
-    public ondebug: (m: string) => any = Util.noop;
+    public ondebug: (m: string) => any = Util.noop; // eslint-disable-line @typescript-eslint/no-explicit-any
     public app = express();
 
     constructor(public readonly password: string, public readonly host: string, public readonly port: number) {
@@ -36,6 +36,7 @@ class RESTServer {
             if (res.headersSent) {
                 return next(error);
             }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return res.status(((error as any).status || (error as any).statusCode || 500) as number).send({ error: error.message || "internal server error" });
         });
     }
@@ -43,7 +44,7 @@ class RESTServer {
     debug(m: string) {
         try {
             this.ondebug.call(this, `[${Date.now()}] ${m}`);
-        } catch {}
+        } catch {} // eslint-disable-line no-empty
     }
 }
 

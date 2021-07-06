@@ -12,7 +12,7 @@ class Client {
     constructor(public readonly socket: WS) {}
 
     get id() {
-        return (this.socket as any).__client_id__ as Snowflake;
+        return (this.socket as any).__client_id__ as Snowflake; // eslint-disable-line @typescript-eslint/no-explicit-any
     }
 
     public subscribe(guild: Snowflake, channel: Snowflake, deaf?: boolean) {

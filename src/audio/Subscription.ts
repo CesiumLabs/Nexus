@@ -4,10 +4,12 @@ import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Track } from "./Track";
 
 export interface VoiceEvents {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     error: (error: Error) => any;
     connectionError: (error: Error) => any;
     start: (resource: AudioResource<Track>) => any;
     finish: (resource: AudioResource<Track>) => any;
+    /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
 class SubscriptionManager extends EventEmitter<VoiceEvents> {
@@ -72,7 +74,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
         try {
             this.audioPlayer.stop(true);
             this.voiceConnection.destroy();
-        } catch {}
+        } catch {} // eslint-disable-line no-empty
     }
 
     pause() {

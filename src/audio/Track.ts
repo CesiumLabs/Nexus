@@ -1,6 +1,6 @@
 import ytdlPromise, { raw as ytdl } from "youtube-dl-exec";
 import { TrackInitOptions } from "../types/types";
-import { demuxProbe, StreamType } from "@discordjs/voice";
+import { StreamType } from "@discordjs/voice";
 import { createAudioResource, AudioResource } from "@discordjs/voice";
 
 class Track {
@@ -54,6 +54,7 @@ class Track {
                 title: title || "Unknown stream",
                 thumbnail: thumbnail || null,
                 url: webpage_url || url,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 created_at: upload_date ? new Date(upload_date.slice(0, 4), upload_date.slice(4, 6), upload_date.slice(6)) : new Date(),
                 extractor: extractor_key

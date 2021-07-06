@@ -1,6 +1,6 @@
 import type { IncomingMessage } from "http";
 import WS from "ws";
-import { WSCloseCodes, WSCloseMessage, WSOpCodes, WSOpCodeClient } from "../../Utils/Constants";
+import { WSCloseCodes, WSCloseMessage, WSOpCodes } from "../../Utils/Constants";
 import { Util } from "../../Utils/Util";
 import { MessagePayload } from "../../types/types";
 import { Client } from "../../audio/Client";
@@ -9,7 +9,7 @@ import clients from "./clients";
 
 class WebSocket {
     public ws: WS.Server;
-    public ondebug: (message: string) => any = Util.noop;
+    public ondebug: (message: string) => any = Util.noop; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     constructor(public readonly password: string, public readonly host: string, public readonly port: number) {
         this.log("Initializing WebSocket server...");
@@ -89,6 +89,7 @@ class WebSocket {
     }
 
     send(ws: WS, data: any) {
+        // eslint-disable-line @typescript-eslint/no-explicit-any
         return ws.send(JSON.stringify(data), Util.noop);
     }
 
@@ -105,13 +106,13 @@ class WebSocket {
     }
 
     private getID(ws: WS) {
-        return (ws as any)["__client_id__"];
+        return (ws as any)["__client_id__"]; // eslint-disable-line @typescript-eslint/no-explicit-any
     }
 
     private log(msg: string) {
         try {
             this.ondebug.call(this, `[${Date.now()}] ${msg}`);
-        } catch {}
+        } catch {} // eslint-disable-line no-empty
     }
 }
 
