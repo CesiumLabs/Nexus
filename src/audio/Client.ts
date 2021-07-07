@@ -45,12 +45,13 @@ class Client {
         entersState(connection, VoiceConnectionStatus.Ready, 30000)
             .then((conn) => {
                 const subscription = new SubscriptionManager(conn, this);
-                this.bindEvents(subscription);
+                this.bindEvents(subscription, guild);
                 this.subscriptions.set(guild, subscription);
                 this.socket.send(
                     JSON.stringify({
                         op: WSOpCodes.VOICE_CONNECTION_READY,
                         d: {
+                            guild_id: guild,
                             ping: conn.ping
                         }
                     })
@@ -62,6 +63,7 @@ class Client {
                     JSON.stringify({
                         op: WSOpCodes.VOICE_CONNECTION_ERROR,
                         d: {
+                            guild_id: guild,
                             message: `${e.message || e}`
                         }
                     })
@@ -69,13 +71,14 @@ class Client {
             });
     }
 
-    private bindEvents(subscription: SubscriptionManager) {
+    private bindEvents(subscription: SubscriptionManager, guildID: Snowflake) {
         subscription
             .on("connectionError", (e) => {
                 this.socket.send(
                     JSON.stringify({
                         op: WSOpCodes.AUDIO_PLAYER_ERROR,
                         d: {
+                            guild_id: guildID,
                             message: e.message || `${e}`
                         }
                     })
@@ -85,7 +88,10 @@ class Client {
                 this.socket.send(
                     JSON.stringify({
                         op: WSOpCodes.TRACK_START,
-                        d: resource?.metadata?.toJSON() || {}
+                        d: {
+                            guild_id: guildID,
+                            track: resource?.metadata?.toJSON() || {}
+                        }
                     })
                 );
             })
@@ -93,7 +99,10 @@ class Client {
                 this.socket.send(
                     JSON.stringify({
                         op: WSOpCodes.TRACK_FINISH,
-                        d: resource?.metadata?.toJSON() || {}
+                        d: {
+                            guild_id: guildID,
+                            track: resource?.metadata?.toJSON() || {}
+                        }
                     })
                 );
             })
@@ -101,7 +110,10 @@ class Client {
                 this.socket.send(
                     JSON.stringify({
                         op: WSOpCodes.TRACK_ERROR,
-                        d: err.message || `${err}`
+                        d: {
+                            guild_id: guildID,
+                            message: err.message || `${err}`
+                        }
                     })
                 );
             })
@@ -109,7 +121,10 @@ class Client {
                 this.socket.send(
                     JSON.stringify({
                         op: WSOpCodes.TRACK_ADD,
-                        d: track?.toJSON() || {}
+                        d: {
+                            guild_id: guildID,
+                            track: track?.toJSON() || {}
+                        }
                     })
                 );
             })
@@ -117,7 +132,9 @@ class Client {
                 this.socket.send(
                     JSON.stringify({
                         op: WSOpCodes.QUEUE_END,
-                        d: {}
+                        d: {
+                            guild_id: guildID
+                        }
                     })
                 );
             });

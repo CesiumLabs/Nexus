@@ -97,6 +97,10 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
         this.voiceConnection.subscribe(this.audioPlayer);
     }
 
+    get guildID() {
+        return this.voiceConnection?.joinConfig.guildId as Snowflake;
+    }
+
     end() {
         this.audioPlayer.stop();
     }

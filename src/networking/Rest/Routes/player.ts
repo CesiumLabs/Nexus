@@ -66,7 +66,8 @@ router.patch("/:clientID/:guildID/player", (req, res) => {
     const oldState = {
         volume: subscription.volume,
         paused: subscription.paused,
-        loop_mode: subscription.loopMode
+        loop_mode: subscription.loopMode,
+        guild_id: guildID
     };
 
     if ("paused" in data) {
@@ -90,7 +91,8 @@ router.patch("/:clientID/:guildID/player", (req, res) => {
         new_state: {
             volume: subscription.volume,
             paused: subscription.paused,
-            loop_mode: subscription.loopMode
+            loop_mode: subscription.loopMode,
+            guild_id: guildID
         }
     };
 
