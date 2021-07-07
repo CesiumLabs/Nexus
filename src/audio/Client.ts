@@ -44,7 +44,7 @@ class Client {
 
         entersState(connection, VoiceConnectionStatus.Ready, 30000)
             .then((conn) => {
-                const subscription = new SubscriptionManager(conn, this);
+                const subscription = new SubscriptionManager(conn, this, guild);
                 this.bindEvents(subscription, guild);
                 this.subscriptions.set(guild, subscription);
                 this.socket.send(
@@ -69,6 +69,19 @@ class Client {
                     })
                 );
             });
+    }
+
+    kill(guild: Snowflake) {
+        this.subscriptions.get(guild).disconnect();
+        this.subscriptions.delete(guild);
+        this.socket.send(
+            JSON.stringify({
+                op: WSOpCodes.VOICE_DISCONNECT,
+                d: {
+                    guild_id: guild
+                }
+            })
+        );
     }
 
     private bindEvents(subscription: SubscriptionManager, guildID: Snowflake) {

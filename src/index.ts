@@ -1,22 +1,39 @@
 /* eslint-disable no-console */
-
-import { Nexus } from "./Nexus";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { version } = require("../package.json");
 import { Util } from "./Utils/Util";
 import { readFile, existsSync } from "fs";
 import type { NexusConstructOptions } from "./types/types";
 import chalk from "chalk";
+import { Command as Commander } from "commander";
+import { generateDependencyReport } from "@discordjs/voice";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { version } = require("../package.json");
-const path = "./nexus.config.json";
+const commander = new Commander();
+commander.version(version);
+commander.configureHelp({
+    commandUsage: () => "nexus [options]"
+});
+commander.allowUnknownOption(false);
+commander.option("-s, --start", "Start Nexus").option("-ytdl, --ytdl-path <path>", "Set youtube-dl binary path").option("-c, --config <path>", "Set Nexus config path").option("-gr, --generate-report", "Get Nexus dependency report");
+
+commander.parse(process.argv);
+const options = commander.opts();
+
+process.env.YOUTUBE_DL_DIR = options.ytdlPath || "./node_modules/@devsnowflake/youtube-dl-exec/bin";
+
+// load it later
+import { Nexus } from "./Nexus";
+
+if (options.generateReport) {
+    console.log(`${generateDependencyReport()}\nYouTube DL\n- path: ${process.env.YOUTUBE_DL_DIR}\n${"-".repeat(50)}`);
+}
 
 function initNexus() {
-    process.env.YOUTUBE_DL_DIR = `${__dirname}/bin`;
-    console.log(chalk.redBright(`[Nexus] version ${version}`));
-    if (!existsSync(path)) throw new Error('[Nexus] Could not locate "nexus.config.json"');
+    const path = findPath();
+    console.log(chalk.redBright(`\n[Nexus] version ${version}\n`));
 
     readFile(path, (error, data) => {
-        if (error) throw new Error('[Nexus] Could not read "nexus.config.json"');
+        if (error) throw new Error("[Nexus] Could not read config file");
         const configData = Util.parse<NexusConstructOptions>(data);
         if (!configData) throw new Error("[Nexus] Invalid nexus config");
 
@@ -40,4 +57,17 @@ function initNexus() {
     });
 }
 
-initNexus();
+function findPath() {
+    const paths = ["./nexus.config.js", "./nexus.config.json", "./.nexusconfig", "./.nexus.config"];
+
+    if (options.config) paths.unshift(options.config);
+
+    for (const path of paths) {
+        if (existsSync(path)) return path;
+        if (path === options.config) throw new Error(`Could not locate specified nexus config: ${path}`);
+    }
+
+    throw new Error(`Could not locate nexus config, tried:\n${paths.map((m) => `- ${m}`).join("\n")}`);
+}
+
+if (options.start) initNexus();

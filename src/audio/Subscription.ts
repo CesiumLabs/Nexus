@@ -27,7 +27,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     #lastVolume = 100;
     public loopMode = LoopMode.OFF;
 
-    constructor(public readonly voiceConnection: VoiceConnection, public readonly client: Client) {
+    constructor(public readonly voiceConnection: VoiceConnection, public readonly client: Client, public readonly guildID: Snowflake) {
         super();
         this.audioPlayer = createAudioPlayer();
 
@@ -37,17 +37,13 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
                     try {
                         await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, 5000);
                     } catch {
-                        try {
-                            this.voiceConnection.destroy();
-                        } catch {} // eslint-disable-line no-empty
+                        this.client.kill(this.guildID);
                     }
                 } else if (this.voiceConnection.rejoinAttempts < 5) {
                     await Util.wait(this.voiceConnection.rejoinAttempts++ * 5000);
                     this.voiceConnection.rejoin();
                 } else {
-                    try {
-                        this.voiceConnection.destroy();
-                    } catch {} // eslint-disable-line no-empty
+                    this.client.kill(this.guildID);
                 }
             } else if (newState.status === VoiceConnectionStatus.Destroyed) {
                 this.end();
@@ -57,9 +53,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
                     await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20000);
                 } catch {
                     if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) {
-                        try {
-                            this.voiceConnection.destroy();
-                        } catch {} // eslint-disable-line no-empty
+                        this.client.kill(this.guildID);
                     }
                 } finally {
                     this.readyLock = false;
@@ -95,10 +89,6 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
         this.voiceConnection.on("error", (error) => void this.emit("connectionError", error));
         this.audioPlayer.on("error", (error) => void this.emit("error", error));
         this.voiceConnection.subscribe(this.audioPlayer);
-    }
-
-    get guildID() {
-        return this.voiceConnection?.joinConfig.guildId as Snowflake;
     }
 
     end() {

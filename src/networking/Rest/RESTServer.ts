@@ -12,15 +12,18 @@ class RESTServer {
         this.app.use(express.urlencoded({ extended: true }));
         this.attachMiddleware();
         this.app.listen(this.port, this.host, () => {
-            this.debug(`REST server started on port ${this.port}`);
+            this.debug(`REST server listening on port ${this.port}`);
         });
     }
 
     private attachMiddleware() {
         this.app.use((req, res, next) => {
             if (this.password && req.headers["authorization"] !== this.password) {
+                this.debug(`${req.path} - Unauthorized request`);
                 return res.status(401).json({ error: "unauthorized" });
             }
+
+            this.debug(`${req.path} - Request incoming`);
 
             return next();
         });
@@ -43,7 +46,7 @@ class RESTServer {
 
     debug(m: string) {
         try {
-            this.ondebug.call(this, `[${Date.now()}] ${m}`);
+            this.ondebug.call(this, `[${new Date().toLocaleString()}] ${m}\n`);
         } catch {} // eslint-disable-line no-empty
     }
 }

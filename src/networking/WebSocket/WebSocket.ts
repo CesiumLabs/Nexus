@@ -19,6 +19,10 @@ class WebSocket {
             port
         });
 
+        this.ws.on("listening", () => {
+            this.log(`WebSocket server listening on port ${this.port}!`);
+        });
+
         this.ws.on("connection", this.handleConnection.bind(this));
     }
 
@@ -111,7 +115,7 @@ class WebSocket {
 
     private log(msg: string) {
         try {
-            this.ondebug.call(this, `[${Date.now()}] ${msg}`);
+            this.ondebug.call(this, `[${new Date().toLocaleString()}] ${msg}\n`);
         } catch {} // eslint-disable-line no-empty
     }
 }

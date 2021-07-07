@@ -31,7 +31,8 @@ export enum WSOpCodes {
     VOICE_CONNECTION_ERROR = 7,
     AUDIO_PLAYER_ERROR = 8,
     QUEUE_END = 9,
-    QUEUE_STATE_UPDATE = 10
+    QUEUE_STATE_UPDATE = 10,
+    VOICE_DISCONNECT = 11
 }
 
 export enum LoopMode {
