@@ -1,5 +1,5 @@
 {
-  "name": "nexus-node",
+  "name": "nexusnode-js",
   "version": "0.1.0",
   "description": "Simple and minimalistic audio node for Discord based on @discordjs/voice",
   "main": "lib/index.js",
