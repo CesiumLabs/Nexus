@@ -170,7 +170,7 @@ router.post("/:clientID/:guildID/:channelID/subscription", (req, res) => {
         return res.status(403).json({ error: `subscription is already available for ${guildID}` });
     }
 
-    client.subscribe(guildID as Snowflake, channelID as Snowflake, req.query.self_deaf === "true");
+    client.subscribe(guildID as Snowflake, channelID as Snowflake, Boolean(req.query.self_deaf));
 
     return res.status(201).json({
         message: `subscription created for ${guildID}`
