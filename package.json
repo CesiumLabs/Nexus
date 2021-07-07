@@ -52,8 +52,8 @@
     "libsodium-wrappers": "^0.7.9",
     "tiny-typed-emitter": "^2.0.3",
     "ws": "^7.5.2",
-    "youtube-dl-exec": "^1.2.4",
-    "youtube-sr": "^4.1.7"
+    "youtube-sr": "^4.1.7",
+    "ytdl-core": "^4.8.3"
   },
   "pkg": {
     "scripts": "lib/**/*.js",

@@ -35,7 +35,7 @@ class Util extends null {
                             duration: m.duration,
                             author: m.channel.name,
                             created_at: new Date(Date.parse(m.uploadedAt)) || Date.now(),
-                            extractor: "Youtube"
+                            extractor: "YouTube"
                         } as TrackInitOptions;
                     });
 

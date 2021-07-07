@@ -11,6 +11,7 @@ const { version } = require("../package.json");
 const path = "./nexus.config.json";
 
 function initNexus() {
+    process.env.YOUTUBE_DL_DIR = `${__dirname}/bin`;
     console.log(chalk.redBright(`[Nexus] version ${version}`));
     if (!existsSync(path)) throw new Error('[Nexus] Could not locate "nexus.config.json"');
 

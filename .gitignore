@@ -4,3 +4,4 @@ yarn.lock
 test/
 lib/
 dist/
+nexus.config.json

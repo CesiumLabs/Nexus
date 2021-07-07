@@ -1,4 +1,4 @@
-import ytdlPromise, { raw as ytdl } from "youtube-dl-exec";
+import ytdl from "ytdl-core";
 import { TrackInitOptions } from "../types/types";
 import type { Readable } from "stream";
 
@@ -13,25 +13,13 @@ class Track {
     constructor(public readonly data: TrackInitOptions) {}
 
     createStream(): Readable {
-        const ytdlProcess = ytdl(
-            this.url,
-            {
-                o: "-",
-                q: "",
-                f: "bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio",
-                r: "100K"
-            },
-            {
-                stdio: ["ignore", "pipe", "ignore"]
-            }
-        );
-
-        if (!ytdlProcess.stdout) throw new Error("No stdout");
-        const stream = ytdlProcess.stdout;
+        const stream = ytdl(this.url, {
+            filter: "audioonly",
+            highWaterMark: 1 << 25
+        });
 
         stream.on("error", () => {
-            if (!ytdlProcess.killed) ytdlProcess.kill();
-            stream.resume();
+            if (!stream.destroyed) stream.destroy();
         });
 
         return stream;
@@ -39,20 +27,17 @@ class Track {
 
     static async getInfo(url: string) {
         try {
-            const { uploader, artist, duration, title, thumbnail, webpage_url, upload_date, extractor_key } = await ytdlPromise(url, {
-                dumpJson: ""
-            });
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            const info = (await ytdl.getInfo(url).catch(() => {})) as ytdl.videoInfo;
 
             return {
-                author: uploader || artist || "Unknown artist",
-                duration: (duration || 0) * 1000,
-                title: title || "Unknown stream",
-                thumbnail: thumbnail || null,
-                url: webpage_url || url,
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                created_at: upload_date ? new Date(upload_date.slice(0, 4), upload_date.slice(4, 6), upload_date.slice(6)) : new Date(),
-                extractor: extractor_key
+                author: info.videoDetails.author.name,
+                duration: parseInt(info.videoDetails.lengthSeconds) * 1000 || 0,
+                title: info.videoDetails.title,
+                thumbnail: info.videoDetails.thumbnails[0].url,
+                url: info.videoDetails.video_url,
+                created_at: info.videoDetails.uploadDate as unknown as Date,
+                extractor: "YouTube"
             } as TrackInitOptions;
         } catch (e) {
             return { error: "Could not parse track info" };
