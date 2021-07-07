@@ -79,7 +79,7 @@ Soon™️
     fetch(`http://localhost:3000/api/${client.user.id}/${message.guild.id}/player`, {
         method: "POST",
         headers: {
-            authorization: "SwagLordNitroUser",
+            authorization: "SwagLordNitroUser12345",
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
