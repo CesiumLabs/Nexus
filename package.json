@@ -1,16 +1,18 @@
 {
-  "name": "nexusnode-js",
+  "name": "nexus",
   "version": "0.1.0",
   "description": "Simple and minimalistic audio node for Discord based on @discordjs/voice",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "test": "cd test && ts-node index.ts",
     "build": "rimraf lib && tsc",
-    "prebuild": "tsc --noEmit --incremental false",
+    "build:check": "tsc --noEmit --incremental false",
     "format": "prettier --write **/*.{js,ts,json}"
   },
   "repository": {
@@ -37,6 +39,7 @@
     "discord-api-types": "^0.18.1",
     "discord.js": "^13.0.0-dev.2e078e4.1625529824",
     "eslint": "^7.30.0",
+    "pkg": "^5.3.0",
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
     "ts-node": "^10.0.0",
