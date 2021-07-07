@@ -2,18 +2,15 @@
   "name": "nexus",
   "version": "0.1.0",
   "description": "Simple and minimalistic audio node for Discord based on @discordjs/voice",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "files": [
-    "lib"
-  ],
+  "bin": "lib/index.js",
   "scripts": {
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "test": "cd test && ts-node index.ts",
     "build": "rimraf lib && tsc",
     "build:check": "tsc --noEmit --incremental false",
-    "format": "prettier --write **/*.{js,ts,json}"
+    "postbuild": "rimraf dist && pkg .",
+    "format": "prettier --write **/*.{js,ts,json,yml}"
   },
   "repository": {
     "type": "git",
@@ -49,11 +46,19 @@
     "@discordjs/collection": "^0.1.6",
     "@discordjs/opus": "^0.5.3",
     "@discordjs/voice": "^0.5.3",
+    "chalk": "^4.1.1",
     "express": "^4.17.1",
     "libsodium-wrappers": "^0.7.9",
     "tiny-typed-emitter": "^2.0.3",
     "ws": "^7.5.2",
     "youtube-dl-exec": "^1.2.4",
     "youtube-sr": "^4.1.7"
+  },
+  "pkg": {
+    "scripts": "lib/**/*.js",
+    "targets": [
+      "node14"
+    ],
+    "outputPath": "dist"
   }
 }

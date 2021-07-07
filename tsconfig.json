@@ -8,7 +8,10 @@
         "strict": true,
         "strictNullChecks": false,
         "esModuleInterop": true,
-        "pretty": true
+        "pretty": true,
+        "removeComments": true,
+        "skipDefaultLibCheck": true,
+        "skipLibCheck": true
     },
     "include": ["src/**/*"]
 }
