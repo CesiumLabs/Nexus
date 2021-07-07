@@ -1,9 +1,10 @@
 {
-  "name": "nexusnode",
-  "version": "1.0.0",
-  "description": "Standalone audio sending node based on @discordjs/voice",
+  "name": "nexus-node",
+  "version": "0.1.0",
+  "description": "Simple and minimalistic audio node for Discord based on @discordjs/voice",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "files": ["lib"],
   "scripts": {
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
