@@ -37,13 +37,17 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
                     try {
                         await entersState(this.voiceConnection, VoiceConnectionStatus.Connecting, 5000);
                     } catch {
-                        this.voiceConnection.destroy();
+                        try {
+                            this.voiceConnection.destroy();
+                        } catch {} // eslint-disable-line no-empty
                     }
                 } else if (this.voiceConnection.rejoinAttempts < 5) {
                     await Util.wait(this.voiceConnection.rejoinAttempts++ * 5000);
                     this.voiceConnection.rejoin();
                 } else {
-                    this.voiceConnection.destroy();
+                    try {
+                        this.voiceConnection.destroy();
+                    } catch {} // eslint-disable-line no-empty
                 }
             } else if (newState.status === VoiceConnectionStatus.Destroyed) {
                 this.end();
@@ -52,7 +56,11 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
                 try {
                     await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 20000);
                 } catch {
-                    if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
+                    if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) {
+                        try {
+                            this.voiceConnection.destroy();
+                        } catch {} // eslint-disable-line no-empty
+                    }
                 } finally {
                     this.readyLock = false;
                 }
