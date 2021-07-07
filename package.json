@@ -57,7 +57,9 @@
   "pkg": {
     "scripts": "lib/**/*.js",
     "targets": [
-      "node14"
+      "node14-win-x64",
+      "node14-mac-x64",
+      "node14-linux-x64"
     ],
     "outputPath": "dist"
   }
