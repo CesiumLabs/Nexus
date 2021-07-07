@@ -130,7 +130,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
         const resource = this.createAudioResource(track);
         if (!this.audioResource) this.audioResource = resource;
         this.audioPlayer.play(resource);
-        resource.volume.setVolume(this.#lastVolume);
+        this.setVolume(this.#lastVolume);
 
         return this;
     }
