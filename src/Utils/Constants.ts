@@ -6,7 +6,8 @@ export enum WSCloseCodes {
     DECODE_ERROR = 4004,
     UNKNOWN_OPCODE = 4005,
     SESSION_EXPIRED = 4006,
-    SERVER_CLOSED = 4010
+    SERVER_CLOSED = 4010,
+    NOT_ALLOWED = 4011
 }
 
 export enum WSCloseMessage {
@@ -17,7 +18,8 @@ export enum WSCloseMessage {
     DECODE_ERROR = "Invalid payload",
     UNKNOWN_OPCODE = "Unknown opcode",
     SESSION_EXPIRED = "Session expired",
-    SERVER_CLOSED = "Server Closed"
+    SERVER_CLOSED = "Server Closed",
+    NOT_ALLOWED = "You are not allowed to connect"
 }
 
 export enum WSOpCodes {

@@ -5,6 +5,7 @@ export interface NexusConstructOptions {
     wsport: number;
     restport: number;
     host?: string;
+    blockedIP?: string[];
 }
 
 export interface MessagePayload {

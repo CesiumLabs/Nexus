@@ -11,7 +11,7 @@ class WebSocket {
     public ws: WS.Server;
     public ondebug: (message: string) => any = Util.noop; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-    constructor(public readonly password: string, public readonly host: string, public readonly port: number) {
+    constructor(public readonly password: string, public readonly host: string, public readonly port: number, public readonly blockedIP: string[] = []) {
         this.log("Initializing WebSocket server...");
 
         this.ws = new WS.Server({
@@ -27,6 +27,9 @@ class WebSocket {
     }
 
     private handleConnection(ws: WS, request: IncomingMessage) {
+        if (this.blockedIP?.includes((request.headers["x-forwarded-for"] || request.socket.remoteAddress) as string)) {
+            return ws.close(WSCloseCodes.NOT_ALLOWED, WSCloseMessage.NOT_ALLOWED);
+        }
         const clientID = request.headers["client-id"] as string;
         if (!clientID) return ws.close(WSCloseCodes.NO_CLIENT_ID, WSCloseMessage.NO_CLIENT_ID);
         if (this.password && request.headers.authorization !== this.password) return ws.close(WSCloseCodes.NO_AUTH, WSCloseMessage.NO_AUTH);
@@ -115,7 +118,7 @@ class WebSocket {
 
     private log(msg: string) {
         try {
-            this.ondebug.call(this, `[${new Date().toLocaleString()}] ${msg}\n`);
+            this.ondebug.call(this, `[${new Date().toLocaleString()}] | ${msg}\n`);
         } catch {} // eslint-disable-line no-empty
     }
 }

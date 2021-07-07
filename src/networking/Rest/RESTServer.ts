@@ -7,7 +7,7 @@ class RESTServer {
     public ondebug: (m: string) => any = Util.noop; // eslint-disable-line @typescript-eslint/no-explicit-any
     public app = express();
 
-    constructor(public readonly password: string, public readonly host: string, public readonly port: number) {
+    constructor(public readonly password: string, public readonly host: string, public readonly port: number, public readonly blockedIP: string[] = []) {
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
         this.attachMiddleware();
@@ -18,12 +18,17 @@ class RESTServer {
 
     private attachMiddleware() {
         this.app.use((req, res, next) => {
+            if (this.blockedIP?.includes((req.headers["x-forwarded-for"] || req.socket.remoteAddress) as string)) {
+                this.debug(`[${req.method.toUpperCase()}] ${req.path} - Request from blocked ip`);
+                return res.status(403).send({ error: "you are not allowed to connect" });
+            }
+
             if (this.password && req.headers["authorization"] !== this.password) {
-                this.debug(`${req.path} - Unauthorized request`);
+                this.debug(`[${req.method.toUpperCase()}] ${req.path} - Unauthorized request`);
                 return res.status(401).json({ error: "unauthorized" });
             }
 
-            this.debug(`${req.path} - Request incoming`);
+            this.debug(`[${req.method.toUpperCase()}] ${req.path} - Request incoming`);
 
             return next();
         });
@@ -46,7 +51,7 @@ class RESTServer {
 
     debug(m: string) {
         try {
-            this.ondebug.call(this, `[${new Date().toLocaleString()}] ${m}\n`);
+            this.ondebug.call(this, `[${new Date().toLocaleString()}] | ${m}\n`);
         } catch {} // eslint-disable-line no-empty
     }
 }
