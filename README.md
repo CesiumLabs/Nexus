@@ -41,7 +41,7 @@ Soon™️
     ws.on("message", data => {
         const message = JSON.parse(data);
 
-        if (data.op === 1) client.guilds.cache.get(message.d.d.guild_id)?.shard.send(message.d);
+        if (message.op === 1) client.guilds.cache.get(message.d.d.guild_id)?.shard.send(message.d);
     });
 
     client.ws.on(Constants.WSEvents.VOICE_SERVER_UPDATE, (payload) => {
