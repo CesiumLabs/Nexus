@@ -23,6 +23,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     public paused = false;
     public audioResource: AudioResource<Track> = null;
     public queue = new Queue(this.voiceConnection.joinConfig.guildId as Snowflake, this);
+    #lastVolume = 100;
 
     constructor(public readonly voiceConnection: VoiceConnection, public readonly client: Client) {
         super();
@@ -102,6 +103,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     setVolume(value: number) {
         if (!this.audioResource || isNaN(value) || value < 0 || value > Infinity) return false;
         this.audioResource.volume.setVolumeLogarithmic(value / 100);
+        this.#lastVolume = value;
         return true;
     }
 
@@ -128,6 +130,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
         const resource = this.createAudioResource(track);
         if (!this.audioResource) this.audioResource = resource;
         this.audioPlayer.play(resource);
+        resource.volume.setVolume(this.#lastVolume);
 
         return this;
     }
