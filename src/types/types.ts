@@ -1,3 +1,5 @@
+import { LoopMode } from "../Utils/Constants";
+
 export interface NexusConstructOptions {
     password?: string;
     wsport: number;
@@ -24,4 +26,5 @@ export interface TrackInitOptions {
 export interface PlayerPatchData {
     paused?: boolean;
     volume?: number;
+    loop_mode?: LoopMode;
 }

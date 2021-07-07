@@ -33,3 +33,9 @@ export enum WSOpCodes {
     QUEUE_END = 9,
     QUEUE_STATE_UPDATE = 10
 }
+
+export enum LoopMode {
+    OFF = 0,
+    TRACK = 1,
+    QUEUE = 2
+}

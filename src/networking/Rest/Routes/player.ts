@@ -3,7 +3,7 @@ import { Snowflake } from "discord-api-types";
 import { Router } from "express";
 import { Track } from "../../../audio/Track";
 import { PlayerPatchData, TrackInitOptions } from "../../../types/types";
-import { WSOpCodes } from "../../../Utils/Constants";
+import { LoopMode, WSOpCodes } from "../../../Utils/Constants";
 import { Util } from "../../../Utils/Util";
 import clients from "../../WebSocket/clients";
 
@@ -62,10 +62,11 @@ router.patch("/:clientID/:guildID/player", (req, res) => {
         return res.status(404).json({ error: `subscription is not available for ${guildID}` });
     }
 
-    const data = req.body.data as PlayerPatchData;
+    const data = (req.body?.data ?? {}) as PlayerPatchData;
     const oldState = {
         volume: subscription.volume,
-        paused: subscription.paused
+        paused: subscription.paused,
+        loop_mode: subscription.loopMode
     };
 
     if ("paused" in data) {
@@ -78,11 +79,18 @@ router.patch("/:clientID/:guildID/player", (req, res) => {
         if (oldState.volume !== vol && !isNaN(vol) && Number.isFinite(vol) && vol > 0) subscription.setVolume(vol);
     }
 
+    if ("loop_mode" in data) {
+        if (Object.values(LoopMode).includes(data.loop_mode)) {
+            subscription.loopMode = data.loop_mode;
+        }
+    }
+
     const payloadData = {
         old_state: oldState,
         new_state: {
             volume: subscription.volume,
-            paused: subscription.paused
+            paused: subscription.paused,
+            loop_mode: subscription.loopMode
         }
     };
 
@@ -211,12 +219,12 @@ router.get("/:clientID/:guildID/player/playing", (req, res) => {
 
     return res.json({
         current: subscription.queue.playing.toJSON(),
-        next: subscription.queue.tracks[0]?.toJSON() ?? null,
+        next: (subscription.loopMode === LoopMode.TRACK ? subscription.queue.playing?.toJSON() : subscription.queue.tracks[0]?.toJSON()) ?? null,
         stream_time: subscription.streamTime
     });
 });
 
-router.get("/:clientID/:guildID/player/tracks", (req, res) => {
+router.get("/:clientID/:guildID/player", (req, res) => {
     const { clientID, guildID } = req.params;
 
     if (!clientID || !guildID) {
@@ -236,8 +244,12 @@ router.get("/:clientID/:guildID/player/tracks", (req, res) => {
 
     return res.json({
         current: subscription.queue.playing?.toJSON() ?? null,
-        tracks: subscription.queue.tracks.map((m) => m.toJSON()),
-        stream_time: subscription.streamTime
+        stream_time: subscription.streamTime,
+        loop_mode: subscription.loopMode,
+        volume: subscription.volume,
+        paused: subscription.paused,
+        latency: subscription.voiceConnection.ping,
+        tracks: subscription.queue.tracks.map((m) => m.toJSON())
     });
 });
 

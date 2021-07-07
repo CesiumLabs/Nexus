@@ -5,6 +5,7 @@ import { Track } from "./Track";
 import { Queue } from "./Queue";
 import { Snowflake } from "discord-api-types";
 import type { Client } from "./Client";
+import { LoopMode } from "../Utils/Constants";
 
 export interface VoiceEvents {
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -24,6 +25,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     public audioResource: AudioResource<Track> = null;
     public queue = new Queue(this.voiceConnection.joinConfig.guildId as Snowflake, this);
     #lastVolume = 100;
+    public loopMode = LoopMode.OFF;
 
     constructor(public readonly voiceConnection: VoiceConnection, public readonly client: Client) {
         super();
@@ -63,8 +65,19 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
             } else if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
                 if (!this.paused) {
                     void this.emit("finish", this.audioResource);
+                    const previousTrack = this.audioResource?.metadata;
+                    let nextTrack: Track;
+
+                    if (this.loopMode === LoopMode.OFF) {
+                        nextTrack = this.queue.tracks.shift();
+                    } else if (this.loopMode === LoopMode.TRACK) {
+                        nextTrack = this.audioResource.metadata;
+                    } else if (this.loopMode === LoopMode.QUEUE) {
+                        this.queue.addTrack(previousTrack);
+                        nextTrack = this.queue.tracks.shift();
+                    }
+
                     this.audioResource = null;
-                    const nextTrack = this.queue.tracks.shift();
                     if (nextTrack) this.playStream(nextTrack, true);
                     else this.emit("stop");
                 }
