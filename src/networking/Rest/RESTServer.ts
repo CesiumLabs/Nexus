@@ -12,7 +12,7 @@ class RESTServer {
     constructor(public readonly password: string, public readonly host: string, public readonly port: number, public readonly blockedIP: string[] = []) {
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
-        this.app.disable("x-powered-by");
+        this.app.set("x-powered-by", "nexus");
         this.attachMiddleware();
         this.app.listen(this.port, this.host, () => {
             this.debug(`REST server listening on port ${this.port}`);

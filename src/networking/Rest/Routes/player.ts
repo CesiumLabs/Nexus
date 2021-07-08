@@ -28,9 +28,9 @@ router.post("/:guildID", async (req, res) => {
         return res.status(404).json({ error: `subscription is not available for ${guildID}` });
     }
 
-    const track = req.body.track as TrackInitOptions;
+    const track = req.body?.track as TrackInitOptions;
     if (!track || !track.url) return res.status(400).json({ error: "track was not found in the request payload" });
-    const info = await Track.getInfo(track.url).catch(Util.noop);
+    const info = Util.isTrackFull(track) ? track : await Track.getInfo(track.url).catch(Util.noop);
     if (!info || (info as { error: string }).error) return res.status(404).json({ error: "track not found" });
 
     const song = new Track(info as TrackInitOptions);
@@ -40,6 +40,48 @@ router.post("/:guildID", async (req, res) => {
         subscription.queue.addTrack(song);
         if (subscription.audioPlayer.state.status !== AudioPlayerStatus.Idle) return;
         subscription.playStream(subscription.queue.tracks.shift(), true);
+    } catch {
+        res.status(500).send({ error: "could not play the track" });
+    }
+});
+
+router.put("/:guildID", async (req, res) => {
+    const { guildID } = req.params;
+    const clientID = req.clientUserID;
+
+    if (!clientID || !guildID) {
+        return res.status(400).json({ error: 'missing "client" or "guild" param' });
+    }
+
+    const client = clients.find((c) => c.id === clientID);
+
+    if (!client) {
+        return res.status(403).json({ error: `client ${clientID} has no active websocket connection` });
+    }
+
+    const subscription = client.subscriptions.get(guildID as Snowflake);
+    if (!subscription) {
+        return res.status(404).json({ error: `subscription is not available for ${guildID}` });
+    }
+
+    const tracks = req.body?.tracks as TrackInitOptions[];
+    if (!tracks || !tracks.length || !tracks.some((x) => x.url)) return res.status(400).json({ error: "track was not found in the request payload" });
+    const songs: Track[] = [];
+
+    for (const track of tracks) {
+        const info = Util.isTrackFull(track) ? track : await Track.getInfo(track.url).catch(Util.noop);
+        if (!info || (info as { error: string }).error) return res.status(404).json({ error: "track not found" });
+
+        const song = new Track(info as TrackInitOptions);
+        songs.push(song);
+    }
+
+    try {
+        res.json(songs.map((m) => m.toJSON()));
+        subscription.queue.addTracks(songs);
+
+        // play if player status is idle else just queue
+        if (subscription.audioPlayer.state.status === AudioPlayerStatus.Idle) subscription.playStream(subscription.queue.tracks.shift(), true);
     } catch {
         res.status(500).send({ error: "could not play the track" });
     }

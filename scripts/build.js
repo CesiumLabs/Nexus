@@ -3,7 +3,7 @@
 const { exec } = require("pkg");
 
 const getPlatform = () => {
-    switch(process.platform) {
+    switch (process.platform) {
         case "win32":
             return "windows";
         case "darwin":

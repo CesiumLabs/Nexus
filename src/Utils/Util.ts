@@ -44,6 +44,19 @@ class Util extends null {
                 .catch(() => reject("No result"));
         });
     }
+
+    static isTrackFull(track: TrackInitOptions) {
+        const props = ["title", "url", "thumbnail", "duration", "author", "created_at", "extractor"];
+        let valid = false;
+
+        for (const prop of props) {
+            if (prop in track) valid = true;
+            if (prop === "url" && typeof track[prop] !== "string") valid = false;
+            if (prop === "duration" && typeof track[prop] !== "number") valid = false;
+        }
+
+        return valid;
+    }
 }
 
 export { Util };
