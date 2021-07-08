@@ -51,3 +51,8 @@ export enum LoopMode {
     TRACK = 1,
     QUEUE = 2
 }
+
+export enum KnownSearchSource {
+    YOUTUBE = "ytsearch",
+    SOUNDCLOUD = "scsearch"
+}

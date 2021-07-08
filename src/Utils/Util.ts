@@ -20,34 +20,9 @@ class Util extends null {
         return new Promise((r) => setTimeout(r, t));
     }
 
-    static ytSearch(query: string, track?: false): Promise<TrackInitOptions[]>;
-    static ytSearch(query: string, track?: true): Promise<Track[]>;
-    static ytSearch(query: string, track?: boolean): Promise<TrackInitOptions[] | Track[]> {
+    static getYTVideo(query: string): Promise<{ info: Track; next?: Track }> {
         return new Promise((resolve, reject) => {
-            YouTube.search(query, { limit: 10, type: "video" })
-                .then((videos) => {
-                    if (!videos.length) return reject("No result");
-                    const data = videos.map((m) => {
-                        return {
-                            title: m.title,
-                            url: m.url,
-                            thumbnail: typeof m.thumbnail === "string" ? m.thumbnail : m.thumbnail.displayThumbnailURL(),
-                            duration: m.duration,
-                            author: m.channel.name,
-                            created_at: new Date(Date.parse(m.uploadedAt)) || new Date(),
-                            extractor: "Youtube"
-                        } as TrackInitOptions;
-                    });
-
-                    return resolve(!track ? data : data.map((m) => new Track(m)));
-                })
-                .catch(() => reject("No result"));
-        });
-    }
-
-    static getYTVideo(query: string): Promise<{ info: Track; next?: Track; }> {
-        return new Promise((resolve, reject) => {
-            YouTube.getVideo(query) 
+            YouTube.getVideo(query)
                 .then((video) => {
                     if (!video) return reject("No result");
                     const m = video.videos[0];
@@ -65,7 +40,7 @@ class Util extends null {
                         info: new Track({
                             title: video.title,
                             url: video.url,
-                            thumbnail: typeof video.thumbnail === "string" ? m.thumbnail as unknown as string: m.thumbnail.displayThumbnailURL(),
+                            thumbnail: typeof video.thumbnail === "string" ? (m.thumbnail as unknown as string) : m.thumbnail.displayThumbnailURL(),
                             duration: video.duration,
                             author: video.channel.name,
                             created_at: new Date(Date.parse(video.uploadedAt)) || new Date(),
