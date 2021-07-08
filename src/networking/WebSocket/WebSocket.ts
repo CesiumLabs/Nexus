@@ -148,8 +148,12 @@ class WebSocket {
 
     private log(msg: string) {
         try {
-            this.ondebug.call(this, `[${new Date().toLocaleString()}] | ${msg}\n`);
+            this.ondebug.call(this, `[${this.time}] | ${msg}\n`);
         } catch {} // eslint-disable-line no-empty
+    }
+
+    get time() {
+        return new Date().toLocaleString();
     }
 }
 

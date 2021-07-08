@@ -74,8 +74,12 @@ class RESTServer {
 
     debug(m: string) {
         try {
-            this.ondebug.call(this, `[${new Date().toLocaleString()}] | ${m}\n`);
+            this.ondebug.call(this, `[${this.time}] | ${m}\n`);
         } catch {} // eslint-disable-line no-empty
+    }
+
+    get time() {
+        return new Date().toLocaleString();
     }
 }
 
