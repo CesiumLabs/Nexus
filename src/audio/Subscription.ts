@@ -141,7 +141,10 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
             return this;
         }
 
-        if (this.voiceConnection.state.status !== VoiceConnectionStatus.Ready) await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 30000);
+        if (this.voiceConnection.state.status !== VoiceConnectionStatus.Ready) {
+            const entersStateResult = await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 30000).catch(() => null);
+            if (entersStateResult === null) return this.client.kill(this.guildID);
+        }
         const resource = this.createAudioResource(track);
         if (!this.audioResource) this.audioResource = resource;
         this.audioPlayer.play(resource);

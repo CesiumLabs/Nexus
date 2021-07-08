@@ -72,16 +72,20 @@ class Client {
     }
 
     kill(guild: Snowflake) {
-        this.subscriptions.get(guild).disconnect();
-        this.subscriptions.delete(guild);
-        this.socket.send(
-            JSON.stringify({
-                t: WSEvents.VOICE_CONNECTION_DISCONNECT,
-                d: {
-                    guild_id: guild
-                }
-            })
-        );
+        try {
+            this.subscriptions.get(guild)?.audioResource?.playStream?.destroy();
+            this.subscriptions.get(guild)?.disconnect();
+            const existed = this.subscriptions.delete(guild);
+            if (existed)
+                this.socket.send(
+                    JSON.stringify({
+                        t: WSEvents.VOICE_CONNECTION_DISCONNECT,
+                        d: {
+                            guild_id: guild
+                        }
+                    })
+                );
+        } catch {} // eslint-disable-line no-empty
     }
 
     private bindEvents(subscription: SubscriptionManager, guildID: Snowflake) {
