@@ -5,5 +5,4 @@ test/
 lib/
 dist/
 .ytdl/
-docs/
 nexus.config.json

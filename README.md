@@ -11,7 +11,7 @@ Simple and minimalistic audio node for Discord based on **[@discordjs/voice](htt
 - Authorization support
 
 # Documentation
-Soon™️
+**[Click Me](https://github.com/DevSnowflake/Nexus/tree/main/docs)**
 
 # How to use
 - download a binary for your os from **[here](https://github.com/DevSnowflake/Nexus/releases/latest)**
@@ -24,6 +24,7 @@ Soon™️
         "password": "SwagLordNitroUser12345"
     }
   ```
+- Make sure you have FFmpeg/Avconv on path or at the root with the name `ffmpeg` or `avconv`
 - Download `youtube-dl`:
   - Either
   ```shell
@@ -32,5 +33,3 @@ Soon™️
 
   - Or download binary from **[here](https://github.com/ytdl-org/youtube-dl/releases/latest)** and specify binary path via `--ytdl-path`
 - Run the binary file you downloaded using `./path/to/nexus --start`
-- Example:
-  SOON™
