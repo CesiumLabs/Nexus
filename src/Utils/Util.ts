@@ -34,12 +34,45 @@ class Util extends null {
                             thumbnail: typeof m.thumbnail === "string" ? m.thumbnail : m.thumbnail.displayThumbnailURL(),
                             duration: m.duration,
                             author: m.channel.name,
-                            created_at: new Date(Date.parse(m.uploadedAt)) || Date.now(),
+                            created_at: new Date(Date.parse(m.uploadedAt)) || new Date(),
                             extractor: "Youtube"
                         } as TrackInitOptions;
                     });
 
                     return resolve(!track ? data : data.map((m) => new Track(m)));
+                })
+                .catch(() => reject("No result"));
+        });
+    }
+
+    static getYTVideo(query: string): Promise<{ info: Track; next?: Track; }> {
+        return new Promise((resolve, reject) => {
+            YouTube.getVideo(query) 
+                .then((video) => {
+                    if (!video) return reject("No result");
+                    const m = video.videos[0];
+                    const next = new Track({
+                        title: m.title,
+                        url: m.url,
+                        thumbnail: typeof m.thumbnail === "string" ? m.thumbnail : m.thumbnail.displayThumbnailURL(),
+                        duration: m.duration,
+                        author: m.channel.name,
+                        created_at: new Date(Date.parse(m.uploadedAt)) || new Date(),
+                        extractor: "Youtube"
+                    });
+
+                    return resolve({
+                        info: new Track({
+                            title: video.title,
+                            url: video.url,
+                            thumbnail: typeof video.thumbnail === "string" ? m.thumbnail as unknown as string: m.thumbnail.displayThumbnailURL(),
+                            duration: video.duration,
+                            author: video.channel.name,
+                            created_at: new Date(Date.parse(video.uploadedAt)) || new Date(),
+                            extractor: "Youtube"
+                        }),
+                        next
+                    });
                 })
                 .catch(() => reject("No result"));
         });
