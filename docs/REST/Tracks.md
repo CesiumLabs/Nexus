@@ -1,7 +1,7 @@
 # Tracks
 Endpoint for tracks (not related to subscription).
 
-## /api/ytsearch?query={QUERY}
+## /api/tracks/ytsearch?query={QUERY}
 This route can be used to make youtube search. The data returned from this endpoint looks like this:
 
 ```json
