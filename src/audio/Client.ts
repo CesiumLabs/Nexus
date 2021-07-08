@@ -2,14 +2,14 @@ import Collection from "@discordjs/collection";
 import { DiscordGatewayAdapterLibraryMethods, joinVoiceChannel, entersState, VoiceConnectionStatus } from "@discordjs/voice";
 import type WS from "ws";
 import type { Snowflake } from "discord-api-types";
-import { WSOpCodes } from "../Utils/Constants";
+import { WSEvents, WSOpCodes } from "../Utils/Constants";
 import { SubscriptionManager } from "./Subscription";
 
 class Client {
     public readonly adapters = new Collection<Snowflake, DiscordGatewayAdapterLibraryMethods>();
     public readonly subscriptions = new Collection<Snowflake, SubscriptionManager>();
 
-    constructor(public readonly socket: WS) {}
+    constructor(public readonly socket: WS, public readonly secret: string) {}
 
     get id() {
         return (this.socket as any).__client_id__ as Snowflake; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -49,7 +49,7 @@ class Client {
                 this.subscriptions.set(guild, subscription);
                 this.socket.send(
                     JSON.stringify({
-                        op: WSOpCodes.VOICE_CONNECTION_READY,
+                        t: WSEvents.VOICE_CONNECTION_READY,
                         d: {
                             guild_id: guild,
                             ping: conn.ping
@@ -61,7 +61,7 @@ class Client {
                 connection.destroy();
                 this.socket.send(
                     JSON.stringify({
-                        op: WSOpCodes.VOICE_CONNECTION_ERROR,
+                        t: WSEvents.VOICE_CONNECTION_ERROR,
                         d: {
                             guild_id: guild,
                             message: `${e.message || e}`
@@ -76,7 +76,7 @@ class Client {
         this.subscriptions.delete(guild);
         this.socket.send(
             JSON.stringify({
-                op: WSOpCodes.VOICE_DISCONNECT,
+                t: WSEvents.VOICE_CONNECTION_DISCONNECT,
                 d: {
                     guild_id: guild
                 }
@@ -89,7 +89,7 @@ class Client {
             .on("connectionError", (e) => {
                 this.socket.send(
                     JSON.stringify({
-                        op: WSOpCodes.AUDIO_PLAYER_ERROR,
+                        t: WSEvents.AUDIO_PLAYER_ERROR,
                         d: {
                             guild_id: guildID,
                             message: e.message || `${e}`
@@ -100,7 +100,7 @@ class Client {
             .on("start", (resource) => {
                 this.socket.send(
                     JSON.stringify({
-                        op: WSOpCodes.TRACK_START,
+                        t: WSEvents.TRACK_START,
                         d: {
                             guild_id: guildID,
                             track: resource?.metadata?.toJSON() || {}
@@ -111,7 +111,7 @@ class Client {
             .on("finish", (resource) => {
                 this.socket.send(
                     JSON.stringify({
-                        op: WSOpCodes.TRACK_FINISH,
+                        t: WSEvents.TRACK_FINISH,
                         d: {
                             guild_id: guildID,
                             track: resource?.metadata?.toJSON() || {}
@@ -122,7 +122,7 @@ class Client {
             .on("error", (err) => {
                 this.socket.send(
                     JSON.stringify({
-                        op: WSOpCodes.TRACK_ERROR,
+                        t: WSEvents.TRACK_ERROR,
                         d: {
                             guild_id: guildID,
                             message: err.message || `${err}`
@@ -133,7 +133,7 @@ class Client {
             .on("trackAdd", (track) => {
                 this.socket.send(
                     JSON.stringify({
-                        op: WSOpCodes.TRACK_ADD,
+                        t: WSEvents.TRACK_ADD,
                         d: {
                             guild_id: guildID,
                             track: track?.toJSON() || {}
@@ -144,7 +144,7 @@ class Client {
             .on("stop", () => {
                 this.socket.send(
                     JSON.stringify({
-                        op: WSOpCodes.QUEUE_END,
+                        t: WSEvents.QUEUE_END,
                         d: {
                             guild_id: guildID
                         }

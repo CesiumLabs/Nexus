@@ -7,7 +7,9 @@ export enum WSCloseCodes {
     UNKNOWN_OPCODE = 4005,
     SESSION_EXPIRED = 4006,
     SERVER_CLOSED = 4010,
-    NOT_ALLOWED = 4011
+    NOT_ALLOWED = 4011,
+    ALREADY_CONNECTED = 4012,
+    NOT_IDENTIFIED = 4013
 }
 
 export enum WSCloseMessage {
@@ -19,22 +21,29 @@ export enum WSCloseMessage {
     UNKNOWN_OPCODE = "Unknown opcode",
     SESSION_EXPIRED = "Session expired",
     SERVER_CLOSED = "Server Closed",
-    NOT_ALLOWED = "You are not allowed to connect"
+    NOT_ALLOWED = "Not allowed to connect",
+    ALREADY_CONNECTED = "Already connected",
+    NOT_IDENTIFIED = "This client is not identified"
 }
 
 export enum WSOpCodes {
     HELLO = 0,
     VOICE_STATE_UPDATE = 1,
-    TRACK_ADD = 2,
-    TRACK_START = 3,
-    TRACK_FINISH = 4,
-    TRACK_ERROR = 5,
-    VOICE_CONNECTION_READY = 6,
-    VOICE_CONNECTION_ERROR = 7,
-    AUDIO_PLAYER_ERROR = 8,
-    QUEUE_END = 9,
-    QUEUE_STATE_UPDATE = 10,
-    VOICE_DISCONNECT = 11
+    IDENTIFY = 10
+}
+
+export enum WSEvents {
+    READY = "READY",
+    TRACK_ADD = "TRACK_ADD",
+    TRACK_START = "TRACK_START",
+    TRACK_FINISH = "TRACK_FINISH",
+    TRACK_ERROR = "TRACK_ERROR",
+    QUEUE_END = "QUEUE_END",
+    QUEUE_STATE_UPDATE = "QUEUE_STATE_UPDATE",
+    VOICE_CONNECTION_READY = "VOICE_CONNECTION_READY",
+    VOICE_CONNECTION_ERROR = "VOICE_CONNECTION_ERROR",
+    VOICE_CONNECTION_DISCONNECT = "VOICE_CONNECTION_DISCONNECT",
+    AUDIO_PLAYER_ERROR = "AUDIO_PLAYER_ERROR"
 }
 
 export enum LoopMode {

@@ -1,11 +1,12 @@
 import type { IncomingMessage } from "http";
 import WS from "ws";
-import { WSCloseCodes, WSCloseMessage, WSOpCodes } from "../../Utils/Constants";
+import { WSCloseCodes, WSCloseMessage, WSEvents, WSOpCodes } from "../../Utils/Constants";
 import { Util } from "../../Utils/Util";
 import { MessagePayload } from "../../types/types";
 import { Client } from "../../audio/Client";
 import { GatewayDispatchEvents } from "discord-api-types/v8";
 import clients from "./clients";
+import { randomBytes } from "crypto";
 
 class WebSocket {
     public ws: WS.Server;
@@ -45,10 +46,6 @@ class WebSocket {
             value: clientID
         });
 
-        const wsClient = new Client(ws);
-
-        clients.set(clientID, wsClient);
-
         this.send(ws, {
             op: WSOpCodes.HELLO,
             d: {
@@ -58,22 +55,42 @@ class WebSocket {
 
         this.log(`HELLO dispatched to ${clientID}`);
 
-        ws.on("message", this.handleWSMessage.bind(this, wsClient));
+        ws.on("message", this.handleWSMessage.bind(this, ws));
         ws.on("close", (code, reason) => {
-            this.log(`Connection was closed for "${clientID}" with the code "${code}" and reason "${reason}"`);
+            this.log(`Connection was closed for "${clientID}" with the code "${code}" and reason "${reason || "No reason"}"`);
+            try {
+                const subclient = clients.get(clientID);
+                subclient?.subscriptions.forEach((s) => subclient.kill(s.guildID));
+            } catch {} // eslint-disable-line no-empty
             clients.delete(clientID);
         });
     }
 
-    private handleWSMessage(client: Client, msg: WS.Data) {
+    private handleWSMessage(ws: WS, msg: WS.Data) {
         const message = Util.parse<MessagePayload>(msg);
-        this.log(`Server got: ${msg}`);
-        const ws = client.socket;
 
         if (!message) {
             this.log(`client ${this.getID(ws)} sent an invalid payload!`);
             return ws.close(WSCloseCodes.DECODE_ERROR, WSCloseMessage.DECODE_ERROR);
         }
+
+        if (message.op === 10) {
+            if (clients.has(this.getID(ws))) return ws.close(WSCloseCodes.ALREADY_CONNECTED, WSCloseMessage.ALREADY_CONNECTED);
+            const secret_key = `${Buffer.from(this.getID(ws)).toString("base64")}.${Date.now()}.${randomBytes(32).toString("hex")}`;
+            const wsClient = new Client(ws, secret_key);
+            clients.set(this.getID(ws), wsClient);
+
+            return this.send(ws, {
+                t: WSEvents.READY,
+                d: {
+                    client_id: wsClient.id,
+                    access_token: secret_key
+                }
+            });
+        }
+
+        const client = clients.get(this.getID(ws));
+        if (!client) return ws.close(WSCloseCodes.NOT_IDENTIFIED, WSCloseMessage.NOT_IDENTIFIED);
 
         switch (message.t) {
             case GatewayDispatchEvents.VoiceStateUpdate:
