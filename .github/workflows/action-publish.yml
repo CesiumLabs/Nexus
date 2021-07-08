@@ -33,7 +33,11 @@ jobs:
 
             - uses: ncipollo/release-action@v1
               with:
+                  allowUpdates: true
                   artifacts: "dist/*"
+                  name: ${{ steps.app_version.outputs.result }}
+                  tag: v${{ steps.app_version.outputs.result }}
+                  draft: true
                   token: ${{ secrets.GITHUB_TOKEN }}
 
     linux:
@@ -63,7 +67,11 @@ jobs:
 
             - uses: ncipollo/release-action@v1
               with:
+                  allowUpdates: true
                   artifacts: "dist/*"
+                  name: ${{ steps.app_version.outputs.result }}
+                  tag: v${{ steps.app_version.outputs.result }}
+                  draft: true
                   token: ${{ secrets.GITHUB_TOKEN }}
 
     mac:
