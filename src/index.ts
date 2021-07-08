@@ -29,18 +29,16 @@ if (options.generateReport) {
 }
 
 function initNexus() {
-    const path = findPath();
+    const path = findPath() ?? `${__dirname}/${Date.now()}`; // placeholder
     console.log(chalk.redBright(`\n[Nexus] version ${version}\n`));
 
-    readFile(path, (error, data) => {
-        if (error) throw new Error("[Nexus] Could not read config file");
-        const configData = Util.parse<NexusConstructOptions>(data);
-        if (!configData) throw new Error("[Nexus] Invalid nexus config");
+    readFile(path, (_, data) => {
+        const configData = data ? Util.parse<NexusConstructOptions>(data) : null;
 
         const props = {
             ...configData,
-            wsport: configData.wsport ?? 8947,
-            restport: configData.restport ?? 7498
+            wsport: configData?.wsport ?? 8947,
+            restport: configData?.restport ?? 7498
         } as NexusConstructOptions;
 
         const nexus = new Nexus(props);
@@ -66,8 +64,6 @@ function findPath() {
         if (existsSync(path)) return path;
         if (path === options.config) throw new Error(`Could not locate specified nexus config: ${path}`);
     }
-
-    throw new Error(`Could not locate nexus config, tried:\n${paths.map((m) => `- ${m}`).join("\n")}`);
 }
 
 if (options.start) initNexus();

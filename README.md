@@ -15,7 +15,7 @@ Simple and minimalistic audio node for Discord based on **[@discordjs/voice](htt
 
 # How to use
 - download a binary for your os from **[here](https://github.com/DevSnowflake/Nexus/releases/latest)**
-- create `nexus.config.json` at the root (or specify it via `--config`) and fill it up:
+- (optional) create `nexus.config.json` at the root (or specify it via `--config`) and fill it up:
   
   ```json
     {
