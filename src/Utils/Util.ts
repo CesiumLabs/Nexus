@@ -14,6 +14,12 @@ class Util extends null {
         }
     }
 
+    static get regex() {
+        return {
+            YOUTUBE_PLAYLIST: /(PL|UU|LL|RD|OL)[a-zA-Z0-9-_]{16,41}/
+        };
+    }
+
     static noop() {} // eslint-disable-line @typescript-eslint/no-empty-function
 
     static wait(t: number): Promise<void> {

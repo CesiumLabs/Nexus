@@ -54,5 +54,6 @@ export enum LoopMode {
 
 export enum KnownSearchSource {
     YOUTUBE = "ytsearch",
-    SOUNDCLOUD = "scsearch"
+    SOUNDCLOUD = "scsearch",
+    YOUTUBE_PLAYLIST = "ytplaylist"
 }
