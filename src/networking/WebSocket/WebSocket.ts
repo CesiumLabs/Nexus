@@ -29,14 +29,19 @@ class WebSocket {
 
     private handleConnection(ws: WS, request: IncomingMessage) {
         if (this.blockedIP?.includes((request.headers["x-forwarded-for"] || request.socket.remoteAddress) as string)) {
+            this.log("Got connection request from blocked ip");
             return ws.close(WSCloseCodes.NOT_ALLOWED, WSCloseMessage.NOT_ALLOWED);
         }
         const clientID = request.headers["client-id"] as string;
         if (!clientID) return ws.close(WSCloseCodes.NO_CLIENT_ID, WSCloseMessage.NO_CLIENT_ID);
-        if (this.password && request.headers.authorization !== this.password) return ws.close(WSCloseCodes.NO_AUTH, WSCloseMessage.NO_AUTH);
+        if (this.password && request.headers.authorization !== this.password) {
+            this.log("Got unauthorized connection request");
+            return ws.close(WSCloseCodes.NO_AUTH, WSCloseMessage.NO_AUTH);
+        }
         if (clients.has(clientID)) {
             const previousSocket = clients.get(clientID)?.socket;
             if (previousSocket && previousSocket.readyState !== previousSocket.CLOSED) {
+                this.log(`Session expired for socket ${clientID}`);
                 previousSocket.close(WSCloseCodes.SESSION_EXPIRED, WSCloseMessage.SESSION_EXPIRED);
             }
         }
@@ -75,22 +80,30 @@ class WebSocket {
         }
 
         if (message.op === 10) {
-            if (clients.has(this.getID(ws))) return ws.close(WSCloseCodes.ALREADY_CONNECTED, WSCloseMessage.ALREADY_CONNECTED);
+            this.log(`${this.getID(ws)} sent identification payload`);
+            if (clients.has(this.getID(ws))) {
+                this.log(`Closed connection for ${this.getID(ws)} for sending identification twice`);
+                return ws.close(WSCloseCodes.ALREADY_CONNECTED, WSCloseMessage.ALREADY_CONNECTED);
+            }
             const secret_key = `${Buffer.from(this.getID(ws)).toString("base64")}.${Date.now()}.${randomBytes(32).toString("hex")}`;
             const wsClient = new Client(ws, secret_key);
             clients.set(this.getID(ws), wsClient);
 
-            return this.send(ws, {
+            this.send(ws, {
                 t: WSEvents.READY,
                 d: {
                     client_id: wsClient.id,
                     access_token: secret_key
                 }
             });
+            return this.log(`READY dispatched to ${wsClient.id}`);
         }
 
         const client = clients.get(this.getID(ws));
-        if (!client) return ws.close(WSCloseCodes.NOT_IDENTIFIED, WSCloseMessage.NOT_IDENTIFIED);
+        if (!client) {
+            this.log(`Got payload from unidentified client ${client.id}`);
+            return ws.close(WSCloseCodes.NOT_IDENTIFIED, WSCloseMessage.NOT_IDENTIFIED);
+        }
 
         switch (message.t) {
             case GatewayDispatchEvents.VoiceStateUpdate:
