@@ -11,18 +11,6 @@ Play/add to queue. If **[full track object](https://github.com/DevSnowflake/Nexu
 ```ts
 /* BODY */
 interface {
-    track: {
-        url: string;
-    }
-}
-```
-
-## PUT /api/player/:guildId
-Same as `POST` method but allows you to queue multiple tracks at once. (useful for playlists)
-
-```ts
-/* BODY */
-interface {
     tracks: [
         {
             url: string;
