@@ -40,12 +40,12 @@ function initNexus() {
 
         const props = {
             server: {
-                ...configData.server,
-                port: configData.server.port ?? 4957
+                ...configData?.server,
+                port: configData?.server?.port ?? 4957
             },
             config: {
-                ...configData.config,
-                updatePlayerStatusInterval: configData.config.updatePlayerStatusInterval ?? -1
+                ...configData?.config,
+                updatePlayerStatusInterval: configData?.config?.updatePlayerStatusInterval ?? -1
             }
         } as NexusConstructOptions;
 
