@@ -71,11 +71,12 @@ router.patch("/:guildID", (req, res) => {
     }
 
     const data = (req.body?.data ?? {}) as PlayerPatchData;
+
     const oldState = {
+        guild_id: guildID,
         volume: subscription.volume,
         paused: subscription.paused,
-        loop_mode: subscription.loopMode,
-        guild_id: guildID
+        loop_mode: subscription.loopMode
     };
 
     if ("paused" in data) {
@@ -97,10 +98,10 @@ router.patch("/:guildID", (req, res) => {
     const payloadData = {
         old_state: oldState,
         new_state: {
+            guild_id: guildID,
             volume: subscription.volume,
             paused: subscription.paused,
-            loop_mode: subscription.loopMode,
-            guild_id: guildID
+            loop_mode: subscription.loopMode
         }
     };
 
@@ -111,7 +112,7 @@ router.patch("/:guildID", (req, res) => {
         })
     );
 
-    return res.json(payloadData);
+    return res.status(204).send();
 });
 
 router.delete("/:guildID", (req, res) => {

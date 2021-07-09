@@ -7,15 +7,16 @@ class Queue {
 
     constructor(public readonly guild: Snowflake, public readonly subscription: SubscriptionManager) {}
 
-    addTrack(track: Track) {
-        this.tracks.push(track);
+    addTrack(track: Track, emit = true) {
+        track.initial ? this.tracks.unshift(track) : this.tracks.push(track);
 
-        this.subscription.emit("trackAdd", track);
+        if (emit) this.subscription.emit("trackAdd", track);
     }
 
     addTracks(tracks: Track[]) {
         // for events
-        tracks.forEach((track) => this.addTrack(track));
+        tracks.forEach((track) => this.addTrack(track, tracks.length === 1));
+        if (tracks.length > 1) this.subscription.emit("tracksAdd", tracks);
     }
 
     shuffle() {

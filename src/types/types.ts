@@ -27,6 +27,7 @@ export interface TrackInitOptions {
     author: string;
     created_at: Date;
     extractor: string;
+    initial?: boolean;
 }
 
 export interface PlayerPatchData {

@@ -14,6 +14,7 @@ interface {
     tracks: [
         {
             url: string;
+            initial?: boolean; // if this track needs to be pushed at index 0, defaults to false
         },
         ...
     ]
@@ -21,7 +22,7 @@ interface {
 ```
 
 ## PATCH /api/player/:guildId
-Modify player (eg: updating loop mode, volume etc.)
+Modify player (eg: updating loop mode, volume etc.). Returns `204` empty response.
 
 ```ts
 /* BODY */

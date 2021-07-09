@@ -42,7 +42,7 @@ class Client {
             }
         });
 
-        entersState(connection, VoiceConnectionStatus.Ready, 30000)
+        entersState(connection, VoiceConnectionStatus.Ready, 60000)
             .then((conn) => {
                 const subscription = new SubscriptionManager(conn, this, guild);
                 this.bindEvents(subscription, guild);
@@ -142,6 +142,17 @@ class Client {
                         d: {
                             guild_id: guildID,
                             track: track?.toJSON() || {}
+                        }
+                    })
+                );
+            })
+            .on("tracksAdd", (tracks) => {
+                this.socket.send(
+                    JSON.stringify({
+                        t: WSEvents.TRACKS_ADD,
+                        d: {
+                            guild_id: guildID,
+                            track: tracks?.map(m => m.toJSON()) || []
                         }
                     })
                 );

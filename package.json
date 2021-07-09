@@ -1,6 +1,6 @@
 {
   "name": "nexus",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Simple and minimalistic audio node for Discord based on @discordjs/voice",
   "bin": "lib/index.js",
   "private": true,
@@ -12,7 +12,8 @@
     "build:check": "tsc --noEmit --incremental false",
     "postbuild": "rimraf dist && node scripts/build.js",
     "format": "prettier --write **/*.{js,ts,json,yml}",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "devStart": "tsc && node lib/index.js -s"
   },
   "repository": {
     "type": "git",

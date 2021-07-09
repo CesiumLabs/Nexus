@@ -15,6 +15,7 @@ export interface VoiceEvents {
     start: (resource: AudioResource<Track>) => any;
     finish: (resource: AudioResource<Track>) => any;
     trackAdd: (track: Track) => any;
+    tracksAdd: (track: Track[]) => any;
     stop: () => any;
     /* eslint-enable @typescript-eslint/no-explicit-any */
 }
@@ -28,6 +29,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     #lastVolume = 100;
     public loopMode = LoopMode.OFF;
     public timer: MiniTimer = null;
+    public filtersUpdate = false;
 
     constructor(public readonly voiceConnection: VoiceConnection, public readonly client: Client, public readonly guildID: Snowflake) {
         super();
@@ -152,7 +154,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
         }
 
         if (this.voiceConnection.state.status !== VoiceConnectionStatus.Ready) {
-            const entersStateResult = await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 30000).catch(() => null);
+            const entersStateResult = await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 60000).catch(() => null);
             if (entersStateResult === null) return this.client.kill(this.guildID);
         }
         const resource = this.createAudioResource(track);
@@ -165,6 +167,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
 
     createAudioResource(track: Track): AudioResource<Track> {
         const stream = track.createStream();
+
         return createAudioResource(stream, {
             metadata: track,
             inlineVolume: true,

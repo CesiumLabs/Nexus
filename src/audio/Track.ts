@@ -9,6 +9,7 @@ class Track {
     public readonly author = this.data.author;
     public readonly duration = this.data.duration;
     public readonly createdAt = this.data.created_at;
+    public readonly initial = Boolean(this.data.initial);
 
     constructor(public readonly data: TrackInitOptions) {}
 

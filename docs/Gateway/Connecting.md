@@ -65,6 +65,7 @@ enum WSOpCodes {
 enum WSEvents {
     READY = "READY",
     TRACK_ADD = "TRACK_ADD",
+    TRACK_ADD = "TRACKS_ADD",
     TRACK_START = "TRACK_START",
     TRACK_FINISH = "TRACK_FINISH",
     TRACK_ERROR = "TRACK_ERROR",
