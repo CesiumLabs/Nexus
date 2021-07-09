@@ -1,6 +1,8 @@
 import { Track } from "../audio/Track";
 import YouTube from "youtube-sr";
 import { TrackInitOptions } from "../types/types";
+import { parse as ParseTOML } from "toml";
+import MiniTimer from "./MiniTimer";
 
 class Util extends null {
     private constructor() {} // eslint-disable-line @typescript-eslint/no-empty-function
@@ -70,6 +72,20 @@ class Util extends null {
         }
 
         return valid;
+    }
+
+    static parseToml<T>(data: string): T {
+        try {
+            return ParseTOML(data);
+        } catch {
+            return null;
+        }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static setInterval(cb: () => any, timeout: number) {
+        const timer = new MiniTimer(cb, timeout);
+        return timer;
     }
 }
 

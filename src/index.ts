@@ -35,17 +35,23 @@ function initNexus() {
     const path = findPath() ?? `${__dirname}/${Date.now()}`; // placeholder
     console.log(chalk.redBright(`\n[Nexus] version ${version}\n`));
 
-    readFile(path, (_, data) => {
-        const configData = data ? Util.parse<NexusConstructOptions>(data) : null;
+    readFile(path, { encoding: "utf-8" }, (_, data) => {
+        const configData = data ? Util.parseToml<NexusConstructOptions>(data) : null;
 
         const props = {
-            ...configData,
-            port: configData?.port ?? 5497
+            server: {
+                ...configData.server,
+                port: configData.server.port ?? 4957
+            },
+            config: {
+                ...configData.config,
+                updatePlayerStatusInterval: configData.config.updatePlayerStatusInterval ?? -1
+            }
         } as NexusConstructOptions;
 
         const nexus = new Nexus(props);
 
-        console.log(chalk.greenBright("[Nexus]"), chalk.whiteBright("Server config:"), chalk.cyanBright(`Port: ${nexus.options.port}`));
+        console.log(chalk.greenBright("[Nexus]"), chalk.whiteBright("Server config:"), chalk.cyanBright(`Port: ${nexus.options.server?.port}`));
 
         nexus.on("wsLog", (msg) => {
             console.log(chalk.cyanBright("[Nexus::WebSocket]"), chalk.whiteBright(msg));
@@ -58,7 +64,7 @@ function initNexus() {
 }
 
 function findPath() {
-    const paths = ["./nexus.config.json", "./.nexusconfig", "./.nexus.config", "./.nexus.config.json"];
+    const paths = ["./nexus.config.toml", "./.nexusconfig.toml", "./.nexus.config.toml", "./.nexus.toml"];
 
     if (options.config) paths.unshift(options.config);
 

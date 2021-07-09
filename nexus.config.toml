@@ -1,0 +1,8 @@
+# Example nexus config
+
+[server]
+port = 3000
+
+[config]
+password = "SwagLordNitroUser12345"
+updatePlayerStatusInterval = 5000

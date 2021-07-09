@@ -12,7 +12,7 @@ class WebSocket {
     public ws: WS.Server;
     public ondebug: (message: string) => any = Util.noop; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-    constructor(public readonly password: string, public readonly blockedIP: string[] = [], public readonly httpServer: Server) {
+    constructor(public readonly password: string, public readonly blockedIP: string[] = [], public readonly httpServer: Server, public readonly updateStatusInterval: number) {
         this.debug("Initializing WebSocket server...");
 
         this.ws = new WS.Server({
@@ -82,7 +82,7 @@ class WebSocket {
                 return ws.close(WSCloseCodes.ALREADY_CONNECTED, WSCloseMessage.ALREADY_CONNECTED);
             }
             const secret_key = `${Buffer.from(this.getID(ws)).toString("base64")}.${Date.now()}.${randomBytes(32).toString("hex")}`;
-            const wsClient = new Client(ws, secret_key);
+            const wsClient = new Client(ws, secret_key, this.updateStatusInterval);
             clients.set(this.getID(ws), wsClient);
 
             this.send(ws, {

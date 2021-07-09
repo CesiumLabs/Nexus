@@ -1,10 +1,15 @@
 import { LoopMode } from "../Utils/Constants";
 
 export interface NexusConstructOptions {
-    password?: string;
-    port: number;
-    host?: string;
-    blockedIP?: string[];
+    server?: {
+        host?: string;
+        port?: number;
+    };
+    config?: {
+        password?: string;
+        blockedIP?: string[];
+        updatePlayerStatusInterval?: number;
+    };
 }
 
 export interface MessagePayload {

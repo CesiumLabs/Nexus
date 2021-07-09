@@ -55,6 +55,7 @@
     "express": "^4.17.1",
     "libsodium-wrappers": "^0.7.9",
     "tiny-typed-emitter": "^2.0.3",
+    "toml": "^3.0.0",
     "ws": "^7.5.2",
     "youtube-sr": "^4.1.7"
   },

@@ -5,7 +5,8 @@ import { Track } from "./Track";
 import { Queue } from "./Queue";
 import { Snowflake } from "discord-api-types";
 import type { Client } from "./Client";
-import { LoopMode } from "../Utils/Constants";
+import { LoopMode, WSEvents } from "../Utils/Constants";
+import type MiniTimer from "../Utils/MiniTimer";
 
 export interface VoiceEvents {
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -26,6 +27,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     public queue = new Queue(this.voiceConnection.joinConfig.guildId as Snowflake, this);
     #lastVolume = 100;
     public loopMode = LoopMode.OFF;
+    public timer: MiniTimer = null;
 
     constructor(public readonly voiceConnection: VoiceConnection, public readonly client: Client, public readonly guildID: Snowflake) {
         super();
@@ -63,6 +65,12 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
 
         this.audioPlayer.on("stateChange", (oldState, newState) => {
             if (newState.status === AudioPlayerStatus.Playing) {
+                if (!this.timer && this.client.statusUpdateInterval > 0 && Number.isFinite(this.client.statusUpdateInterval)) {
+                    this.timer = Util.setInterval(() => {
+                        this.client.socket.send(this.createPlayerStatusPayload(), Util.noop);
+                    }, this.client.statusUpdateInterval);
+                    this.timer.start();
+                } else if (this.timer?.paused) this.timer.resume();
                 if (!this.paused) return void this.emit("start", this.audioResource);
             } else if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
                 if (!this.paused) {
@@ -97,6 +105,8 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
 
     disconnect() {
         try {
+            this.timer?.clear();
+            this.timer = null;
             this.audioPlayer.stop(true);
             this.queue.tracks = [];
             this.voiceConnection.destroy();
@@ -159,6 +169,22 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
             metadata: track,
             inlineVolume: true,
             inputType: StreamType.Arbitrary
+        });
+    }
+
+    createPlayerStatusPayload() {
+        return JSON.stringify({
+            op: WSEvents.AUDIO_PLAYER_STATUS,
+            d: {
+                guild_id: this.guildID,
+                timestamp: Date.now(),
+                stream_time: this.streamTime,
+                volume: this.volume,
+                paused: this.paused,
+                latency: this.voiceConnection?.ping ?? {},
+                current: this.queue.playing?.toJSON() || null,
+                queue: this.queue.tracks.map((m) => m.toJSON())
+            }
         });
     }
 }

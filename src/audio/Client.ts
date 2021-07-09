@@ -9,7 +9,7 @@ class Client {
     public readonly adapters = new Collection<Snowflake, DiscordGatewayAdapterLibraryMethods>();
     public readonly subscriptions = new Collection<Snowflake, SubscriptionManager>();
 
-    constructor(public readonly socket: WS, public readonly secret: string) {}
+    constructor(public readonly socket: WS, public readonly secret: string, public readonly statusUpdateInterval: number) {}
 
     get id() {
         return (this.socket as any).__client_id__ as Snowflake; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -73,6 +73,7 @@ class Client {
 
     kill(guild: Snowflake) {
         try {
+            this.subscriptions.get(guild)?.timer?.clear();
             this.subscriptions.get(guild)?.audioResource?.playStream?.destroy();
             this.subscriptions.get(guild)?.disconnect();
             const existed = this.subscriptions.delete(guild);
