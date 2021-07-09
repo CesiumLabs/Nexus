@@ -2,8 +2,7 @@ import { LoopMode } from "../Utils/Constants";
 
 export interface NexusConstructOptions {
     password?: string;
-    wsport: number;
-    restport: number;
+    port: number;
     host?: string;
     blockedIP?: string[];
 }

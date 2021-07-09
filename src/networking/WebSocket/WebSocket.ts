@@ -1,4 +1,4 @@
-import type { IncomingMessage } from "http";
+import type { IncomingMessage, Server } from "http";
 import WS from "ws";
 import { WSCloseCodes, WSCloseMessage, WSEvents, WSOpCodes } from "../../Utils/Constants";
 import { Util } from "../../Utils/Util";
@@ -12,16 +12,12 @@ class WebSocket {
     public ws: WS.Server;
     public ondebug: (message: string) => any = Util.noop; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-    constructor(public readonly password: string, public readonly host: string, public readonly port: number, public readonly blockedIP: string[] = []) {
-        this.log("Initializing WebSocket server...");
+    constructor(public readonly password: string, public readonly blockedIP: string[] = [], public readonly httpServer: Server) {
+        this.debug("Initializing WebSocket server...");
 
         this.ws = new WS.Server({
-            host,
-            port
-        });
-
-        this.ws.on("listening", () => {
-            this.log(`WebSocket server listening on port ${this.port}!`);
+            server: this.httpServer,
+            perMessageDeflate: false
         });
 
         this.ws.on("connection", this.handleConnection.bind(this));
@@ -29,19 +25,19 @@ class WebSocket {
 
     private handleConnection(ws: WS, request: IncomingMessage) {
         if (this.blockedIP?.includes((request.headers["x-forwarded-for"] || request.socket.remoteAddress) as string)) {
-            this.log("Got connection request from blocked ip");
+            this.debug("Got connection request from blocked ip");
             return ws.close(WSCloseCodes.NOT_ALLOWED, WSCloseMessage.NOT_ALLOWED);
         }
         const clientID = request.headers["client-id"] as string;
         if (!clientID) return ws.close(WSCloseCodes.NO_CLIENT_ID, WSCloseMessage.NO_CLIENT_ID);
         if (this.password && request.headers.authorization !== this.password) {
-            this.log("Got unauthorized connection request");
+            this.debug("Got unauthorized connection request");
             return ws.close(WSCloseCodes.NO_AUTH, WSCloseMessage.NO_AUTH);
         }
         if (clients.has(clientID)) {
             const previousSocket = clients.get(clientID)?.socket;
             if (previousSocket && previousSocket.readyState !== previousSocket.CLOSED) {
-                this.log(`Session expired for socket ${clientID}`);
+                this.debug(`Session expired for socket ${clientID}`);
                 previousSocket.close(WSCloseCodes.SESSION_EXPIRED, WSCloseMessage.SESSION_EXPIRED);
             }
         }
@@ -58,11 +54,11 @@ class WebSocket {
             }
         });
 
-        this.log(`HELLO dispatched to ${clientID}`);
+        this.debug(`HELLO dispatched to ${clientID}`);
 
         ws.on("message", this.handleWSMessage.bind(this, ws));
         ws.on("close", (code, reason) => {
-            this.log(`Connection was closed for "${clientID}" with the code "${code}" and reason "${reason || "No reason"}"`);
+            this.debug(`Connection was closed for "${clientID}" with the code "${code}" and reason "${reason || "No reason"}"`);
             try {
                 const subclient = clients.get(clientID);
                 subclient?.subscriptions.forEach((s) => subclient.kill(s.guildID));
@@ -75,14 +71,14 @@ class WebSocket {
         const message = Util.parse<MessagePayload>(msg);
 
         if (!message) {
-            this.log(`client ${this.getID(ws)} sent an invalid payload!`);
+            this.debug(`client ${this.getID(ws)} sent an invalid payload!`);
             return ws.close(WSCloseCodes.DECODE_ERROR, WSCloseMessage.DECODE_ERROR);
         }
 
         if (message.op === 10) {
-            this.log(`${this.getID(ws)} sent identification payload`);
+            this.debug(`${this.getID(ws)} sent identification payload`);
             if (clients.has(this.getID(ws))) {
-                this.log(`Closed connection for ${this.getID(ws)} for sending identification twice`);
+                this.debug(`Closed connection for ${this.getID(ws)} for sending identification twice`);
                 return ws.close(WSCloseCodes.ALREADY_CONNECTED, WSCloseMessage.ALREADY_CONNECTED);
             }
             const secret_key = `${Buffer.from(this.getID(ws)).toString("base64")}.${Date.now()}.${randomBytes(32).toString("hex")}`;
@@ -96,12 +92,12 @@ class WebSocket {
                     access_token: secret_key
                 }
             });
-            return this.log(`READY dispatched to ${wsClient.id}`);
+            return this.debug(`READY dispatched to ${wsClient.id}`);
         }
 
         const client = clients.get(this.getID(ws));
         if (!client) {
-            this.log(`Got payload from unidentified client ${client.id}`);
+            this.debug(`Got payload from unidentified client ${client.id}`);
             return ws.close(WSCloseCodes.NOT_IDENTIFIED, WSCloseMessage.NOT_IDENTIFIED);
         }
 
@@ -131,7 +127,7 @@ class WebSocket {
     }
 
     close() {
-        this.log("Closing the server...");
+        this.debug("Closing the server...");
 
         this.ws.clients.forEach((client) => {
             if (client.readyState !== client.OPEN) return;
@@ -146,7 +142,7 @@ class WebSocket {
         return (ws as any)["__client_id__"]; // eslint-disable-line @typescript-eslint/no-explicit-any
     }
 
-    private log(msg: string) {
+    debug(msg: string) {
         try {
             this.ondebug.call(this, `[${this.time}] | ${msg}\n`);
         } catch {} // eslint-disable-line no-empty

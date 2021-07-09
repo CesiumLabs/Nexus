@@ -9,14 +9,11 @@ class RESTServer {
     public ondebug: (m: string) => any = Util.noop; // eslint-disable-line @typescript-eslint/no-explicit-any
     public app = express();
 
-    constructor(public readonly password: string, public readonly host: string, public readonly port: number, public readonly blockedIP: string[] = []) {
+    constructor(public readonly blockedIP: string[] = []) {
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
         this.app.set("x-powered-by", "nexus");
         this.attachMiddleware();
-        this.app.listen(this.port, this.host, () => {
-            this.debug(`REST server listening on port ${this.port}`);
-        });
     }
 
     private attachMiddleware() {

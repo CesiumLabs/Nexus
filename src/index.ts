@@ -14,7 +14,10 @@ commander.configureHelp({
     commandUsage: () => "nexus [options]"
 });
 commander.allowUnknownOption(false);
-commander.option("-s, --start", "Start Nexus").option("-ytdl, --ytdl-path <path>", "Set youtube-dl binary path").option("-c, --config <path>", "Set Nexus config path").option("-gr, --generate-report", "Get Nexus dependency report");
+commander.option("-s, --start", "Start Nexus");
+commander.option("-ytdl, --ytdl-path <path>", "Set youtube-dl binary path");
+commander.option("-c, --config <path>", "Set Nexus config path");
+commander.option("-gr, --generate-report", "Get Nexus dependency report");
 
 commander.parse(process.argv);
 const options = commander.opts();
@@ -37,13 +40,12 @@ function initNexus() {
 
         const props = {
             ...configData,
-            wsport: configData?.wsport ?? 8947,
-            restport: configData?.restport ?? 7498
+            port: configData?.port ?? 5497
         } as NexusConstructOptions;
 
         const nexus = new Nexus(props);
 
-        console.log(chalk.greenBright("[Nexus]"), chalk.whiteBright("Server config:"), chalk.cyanBright(`WS Port: ${nexus.options.wsport}`), chalk.cyanBright(`REST Port: ${nexus.options.restport}`));
+        console.log(chalk.greenBright("[Nexus]"), chalk.whiteBright("Server config:"), chalk.cyanBright(`Port: ${nexus.options.port}`));
 
         nexus.on("wsLog", (msg) => {
             console.log(chalk.cyanBright("[Nexus::WebSocket]"), chalk.whiteBright(msg));
@@ -56,7 +58,7 @@ function initNexus() {
 }
 
 function findPath() {
-    const paths = ["./nexus.config.js", "./nexus.config.json", "./.nexusconfig", "./.nexus.config"];
+    const paths = ["./nexus.config.json", "./.nexusconfig", "./.nexus.config", "./.nexus.config.json"];
 
     if (options.config) paths.unshift(options.config);
 
