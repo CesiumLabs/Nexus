@@ -174,7 +174,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
 
     createPlayerStatusPayload() {
         return JSON.stringify({
-            op: WSEvents.AUDIO_PLAYER_STATUS,
+            t: WSEvents.AUDIO_PLAYER_STATUS,
             d: {
                 guild_id: this.guildID,
                 timestamp: Date.now(),
