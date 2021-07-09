@@ -19,8 +19,7 @@ Simple and minimalistic audio node for Discord based on **[@discordjs/voice](htt
   
   ```json
     {
-        "wsport": 3500,
-        "restport": 3000,
+        "port": 3500,
         "password": "SwagLordNitroUser12345"
     }
   ```
