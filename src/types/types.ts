@@ -9,6 +9,7 @@ export interface NexusConstructOptions {
         password?: string;
         blockedIP?: string[];
         updatePlayerStatusInterval?: number;
+        playlistMaxPage?: number;
     };
 }
 
