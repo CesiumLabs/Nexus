@@ -152,7 +152,7 @@ class Client {
                         t: WSEvents.TRACKS_ADD,
                         d: {
                             guild_id: guildID,
-                            track: tracks?.map(m => m.toJSON()) || []
+                            track: tracks?.map((m) => m.toJSON()) || []
                         }
                     })
                 );
