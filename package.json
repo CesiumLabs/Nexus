@@ -13,7 +13,7 @@
     "postbuild": "rimraf dist && node scripts/build.js",
     "format": "prettier --write **/*.{js,ts,json,yml}",
     "prepare": "husky install",
-    "devStart": "tsc && node lib/index.js -s"
+    "dev": "tsc && node lib/index.js"
   },
   "repository": {
     "type": "git",
