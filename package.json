@@ -53,6 +53,7 @@
     "chalk": "^4.1.1",
     "commander": "^8.0.0",
     "express": "^4.17.1",
+    "ffmpeg-static": "^4.4.0",
     "libsodium-wrappers": "^0.7.9",
     "tiny-typed-emitter": "^2.0.3",
     "toml": "^3.0.0",
@@ -64,7 +65,8 @@
     "assets": [
       "node_modules/@discordjs/**",
       "node_modules/libsodium-wrappers/**",
-      "node_modules/@devsnowflake/**"
+      "node_modules/@devsnowflake/**",
+      "node_modules/ffmpeg-static/**"
     ],
     "targets": [
       "node14"
