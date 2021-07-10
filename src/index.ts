@@ -18,6 +18,10 @@ commander.option("-s, --start", "Start Nexus");
 commander.option("-ytdl, --ytdl-path <path>", "Set youtube-dl binary path");
 commander.option("-c, --config <path>", "Set Nexus config path");
 commander.option("-gr, --generate-report", "Get Nexus dependency report");
+commander.option("-p, --port <port>", "Set web server port for Nexus");
+commander.option("-h, --host <hostname>", "Set web server hostname for Nexus");
+commander.option("-pass, --password <password>", "Set password for Nexus");
+commander.option("-upsi, --update-player-status-interval <interval>", "Set interval to send player status to clients");
 
 commander.parse(process.argv);
 const options = commander.opts();
@@ -52,12 +56,14 @@ function initNexus() {
 
         const props = {
             server: {
-                ...configData?.server,
-                port: configData?.server?.port ?? 4957
+                host: options?.hostname ?? configData?.server?.host,
+                port: parseInt(options?.port) || configData?.server?.port || 4957
             },
             config: {
-                ...configData?.config,
-                updatePlayerStatusInterval: configData?.config?.updatePlayerStatusInterval ?? -1
+                password: options?.password ?? configData?.config?.password,
+                blockedIP: configData?.config.blockedIP ?? [],
+                playlistMaxPage: configData?.config.playlistMaxPage ?? 100,
+                updatePlayerStatusInterval: parseInt(options?.upsi) || configData?.config?.updatePlayerStatusInterval || -1
             }
         } as NexusConstructOptions;
 
