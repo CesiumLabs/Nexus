@@ -49,7 +49,7 @@ function initNexus() {
 `)
     );
     const path = findPath() ?? `${__dirname}/${Date.now()}`; // placeholder
-    console.log(chalk.redBright(`\n[Nexus] version ${version}\n`));
+    console.log(chalk.redBright(`\n[Nexus] version ${version} | Nodejs ${process.version}\n`));
 
     readFile(path, { encoding: "utf-8" }, (_, data) => {
         const configData = data ? Util.parseToml<NexusConstructOptions>(data) : null;
