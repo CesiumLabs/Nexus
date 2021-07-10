@@ -32,6 +32,18 @@ if (options.generateReport) {
 }
 
 function initNexus() {
+    console.log(
+        chalk.greenBright(`\n
+ _        _______                    _______
+( (    /|(  ____ \\|\\     /||\\     /|(  ____ \\
+|  \\  ( || (    \\/( \\   / )| )   ( || (    \\/
+|   \\ | || (__     \\ (_) / | |   | || (_____
+| (\\ \\) ||  __)     ) _ (  | |   | |(_____  )
+| | \\   || (       / ( ) \\ | |   | |      ) |
+| )  \\  || (____/\\( /   \\ )| (___) |/\\____) |
+|/    )_)(_______/|/     \\|(_______)\\_______)\n
+`)
+    );
     const path = findPath() ?? `${__dirname}/${Date.now()}`; // placeholder
     console.log(chalk.redBright(`\n[Nexus] version ${version}\n`));
 
