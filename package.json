@@ -64,9 +64,7 @@
     "scripts": "lib/**/*.js",
     "assets": [
       "node_modules/@discordjs/**",
-      "node_modules/libsodium-wrappers/**",
-      "node_modules/@devsnowflake/**",
-      "node_modules/ffmpeg-static/**"
+      "node_modules/libsodium-wrappers/**"
     ],
     "targets": [
       "node14"
