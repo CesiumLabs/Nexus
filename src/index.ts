@@ -57,7 +57,7 @@ function initNexus() {
         const props = {
             server: {
                 host: options?.hostname ?? configData?.server?.host,
-                port: parseInt(options?.port) || configData?.server?.port || 4957
+                port: parseInt(options?.port) || process.env.PORT || configData?.server?.port || 4957
             },
             config: {
                 password: options?.password ?? configData?.config?.password,
