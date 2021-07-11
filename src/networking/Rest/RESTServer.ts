@@ -4,6 +4,8 @@ import PlayerRoutes from "./Routes/player";
 import SubscriptionRoutes from "./Routes/subscriptions";
 import TrackRoutes from "./Routes/track";
 import clients from "../WebSocket/clients";
+import cors from "cors";
+import helmet from "helmet";
 
 class RESTServer {
     public ondebug: (m: string) => any = Util.noop; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -17,6 +19,13 @@ class RESTServer {
     }
 
     private attachMiddleware() {
+        this.app.use(cors());
+        this.app.use(
+            helmet({
+                contentSecurityPolicy: false
+            })
+        );
+
         this.app.use((req, res, next) => {
             if (this.blockedIP?.includes((req.headers["x-forwarded-for"] || req.socket.remoteAddress) as string)) {
                 this.debug(`[${req.method.toUpperCase()}] ${req.path} - Request from blocked ip`);

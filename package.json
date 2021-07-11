@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/DevSnowflake/Nexus#readme",
   "devDependencies": {
+    "@types/cors": "^2.8.12",
     "@types/express": "^4.17.12",
     "@types/node": "^16.0.0",
     "@typescript-eslint/eslint-plugin": "^4.28.2",
@@ -51,7 +52,9 @@
     "@discordjs/voice": "^0.5.3",
     "chalk": "^4.1.1",
     "commander": "^8.0.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
+    "helmet": "^4.6.0",
     "libsodium-wrappers": "^0.7.9",
     "tiny-typed-emitter": "^2.0.3",
     "toml": "^3.0.0",
