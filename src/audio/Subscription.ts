@@ -94,6 +94,8 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
                     else {
                         this.emit("stop");
                         this.timer?.pause();
+                        // sent status after pause (to get latest update)
+                        this.client.socket.send(this.createPlayerStatusPayload(), Util.noop);
                     }
                 }
             }
