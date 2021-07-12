@@ -1,5 +1,5 @@
 # Getting Started
-- download a binary for your os from **[here](https://github.com/DevSnowflake/Nexus/releases/latest)**
+- download `nexus` using `npm i reflect-nexus`
 - (optional) create `nexus.config.toml` at the root (or specify the path via `--config`) and fill it up:
   
   ```toml
@@ -14,12 +14,5 @@
     updatePlayerStatusInterval = 5000 
     # blockedIP = [] # List of blacklisted IPs
   ```
-- Make sure you have FFmpeg/Avconv on path or at the root with the name `ffmpeg` or `avconv`
-- Download `youtube-dl`:
-  - Either
-  ```shell
-    $ npm install @devsnowflake/youtube-dl-exec
-  ```
-
-  - Or download binary from **[here](https://github.com/ytdl-org/youtube-dl/releases/latest)** and specify binary path via `--ytdl-path`
-- Run the binary file you downloaded using `./path/to/nexus --start`
+- Make sure you have `Python` installed for `youtube-dl`
+- Run the binary file you downloaded using `reflect-nexus --start`
