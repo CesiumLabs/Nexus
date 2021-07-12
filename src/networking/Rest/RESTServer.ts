@@ -6,6 +6,7 @@ import TrackRoutes from "./Routes/track";
 import clients from "../WebSocket/clients";
 import cors from "cors";
 import helmet from "helmet";
+import MiscRoutes from "./Routes/misc";
 
 class RESTServer {
     public ondebug: (m: string) => any = Util.noop; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -47,7 +48,7 @@ class RESTServer {
             return next();
         });
 
-        this.app.get("/", (req, res) => res.json({ message: "hello world" }));
+        this.app.use("/", MiscRoutes);
         this.app.use("/api/subscription", SubscriptionRoutes);
         this.app.use("/api/player", PlayerRoutes);
         this.app.use("/api/tracks", TrackRoutes);
