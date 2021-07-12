@@ -4,7 +4,6 @@ Simple and minimalistic audio node for Discord based on **[@discordjs/voice](htt
 # WIP
 
 # Features
-- Standalone binary
 - REST & WebSocket
 - Easy to setup
 - Multiple clients support
