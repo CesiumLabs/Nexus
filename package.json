@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "preferGlobal": true,
   "bin": {
-    "nexus": "bin/nexus.js"
+    "nexus": "bin/nexus.js",
+    "reflect-nexus": "bin/nexus.js"
   },
   "files": [
     "bin",
