@@ -97,7 +97,7 @@ class WebSocket {
 
         const client = clients.get(this.getID(ws));
         if (!client) {
-            this.debug(`Got payload from unidentified client ${client.id}`);
+            this.debug(`Got payload from unidentified client ${client?.id}`);
             return ws.close(WSCloseCodes.NOT_IDENTIFIED, WSCloseMessage.NOT_IDENTIFIED);
         }
 
