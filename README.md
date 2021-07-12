@@ -1,5 +1,5 @@
 # Nexus
-Simple and minimalistic audio node for Discord based on **[@discordjs/voice](https://github.com/discordjs/voice)**
+Reflect Nexus is a simple and minimalistic audio node for Discord based on **[@discordjs/voice](https://github.com/discordjs/voice)**
 
 # WIP
 
@@ -8,6 +8,20 @@ Simple and minimalistic audio node for Discord based on **[@discordjs/voice](htt
 - Easy to setup
 - Multiple clients support
 - Authorization support
+
+# Installing
+
+```sh
+$ npm install reflect-nexus
+```
+
+## Start Nexus
+`package.json`
+```json
+"start": {
+    "nexus": "reflect-nexus -s"
+}
+```
 
 # Documentation
 **[Click Me](https://github.com/DevSnowflake/Nexus/tree/main/docs)**
