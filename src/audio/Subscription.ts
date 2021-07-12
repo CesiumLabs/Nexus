@@ -140,7 +140,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     }
 
     get volume() {
-        if (!this.audioResource || !this.audioResource.volume) return 100;
+        if (!this.audioResource || !this.audioResource.volume) return this.#lastVolume ?? 100;
         const currentVol = this.audioResource.volume.volume;
         return Math.round(Math.pow(currentVol, 1 / 1.660964) * 100);
     }
