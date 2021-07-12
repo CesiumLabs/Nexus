@@ -1,109 +1,20 @@
-name: Publish Nexus Release
+name: Publish to NPM
+
 on:
-    workflow_dispatch:
-    push:
-        branches:
-            - main
+  release:
+    types: [created]
 
 jobs:
-    windows:
-        runs-on: windows-latest
-
-        steps:
-            - uses: actions/checkout@v2
-
-            - uses: actions/setup-node@v2
-              with:
-                  node-version: "14.16.0"
-
-            - name: Install dependencies
-              run: yarn install
-
-            - name: Build Binary
-              run: yarn build
-
-            - name: Get app version
-              uses: actions/github-script@v4
-              id: app_version
-              with:
-                  result-encoding: string
-                  script: |
-                      const packageJson = require("./package.json");
-                      return packageJson.version;
-
-            - uses: ncipollo/release-action@v1
-              with:
-                  allowUpdates: true
-                  artifacts: "dist/*"
-                  name: ${{ steps.app_version.outputs.result }}
-                  tag: v${{ steps.app_version.outputs.result }}
-                  draft: true
-                  token: ${{ secrets.GITHUB_TOKEN }}
-
-    linux:
-        runs-on: ubuntu-latest
-
-        steps:
-            - uses: actions/checkout@v2
-
-            - uses: actions/setup-node@v2
-              with:
-                  node-version: "14.16.0"
-
-            - name: Install dependencies
-              run: yarn install
-
-            - name: Build Binary
-              run: yarn build
-
-            - name: Get app version
-              uses: actions/github-script@v4
-              id: app_version
-              with:
-                  result-encoding: string
-                  script: |
-                      const packageJson = require("./package.json");
-                      return packageJson.version;
-
-            - uses: ncipollo/release-action@v1
-              with:
-                  allowUpdates: true
-                  artifacts: "dist/*"
-                  name: ${{ steps.app_version.outputs.result }}
-                  tag: v${{ steps.app_version.outputs.result }}
-                  draft: true
-                  token: ${{ secrets.GITHUB_TOKEN }}
-
-    mac:
-        runs-on: macos-latest
-
-        steps:
-            - uses: actions/checkout@v2
-
-            - uses: actions/setup-node@v2
-              with:
-                  node-version: "14.16.0"
-
-            - name: Install dependencies
-              run: yarn install
-
-            - name: Build Binary
-              run: yarn build
-
-            - name: Get app version
-              uses: actions/github-script@v4
-              id: app_version
-              with:
-                  result-encoding: string
-                  script: |
-                      const packageJson = require("./package.json");
-                      return packageJson.version;
-
-            - uses: ncipollo/release-action@v1
-              with:
-                  allowUpdates: true
-                  artifacts: "dist/*"
-                  name: ${{ steps.app_version.outputs.result }}
-                  tag: v${{ steps.app_version.outputs.result }}
-                  draft: true
-                  token: ${{ secrets.GITHUB_TOKEN }}
+  publish-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+      - run: npm install
+      - run: npm run build
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}

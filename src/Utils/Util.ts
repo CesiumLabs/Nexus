@@ -4,7 +4,7 @@ import { TrackInitOptions } from "../types/types";
 import { parse as ParseTOML } from "toml";
 import MiniTimer from "./MiniTimer";
 
-class Util extends null {
+class Util {
     private constructor() {} // eslint-disable-line @typescript-eslint/no-empty-function
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

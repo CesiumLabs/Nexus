@@ -1,19 +1,26 @@
 {
-  "name": "nexus",
-  "version": "0.1.10",
+  "name": "reflect-nexus",
+  "version": "1.0.0",
   "description": "Simple and minimalistic audio node for Discord based on @discordjs/voice",
-  "bin": "lib/index.js",
-  "private": true,
+  "main": "dist/index.js",
+  "preferGlobal": true,
+  "bin": {
+    "nexus": "bin/nexus.js"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
   "scripts": {
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "test": "cd test && npx ts-node index.ts",
-    "build": "rimraf lib && tsc",
+    "build": "rimraf dist && tsc",
     "build:check": "tsc --noEmit --incremental false",
-    "postbuild": "rimraf dist && node scripts/build.js",
     "format": "prettier --write **/*.{js,ts,json,yml}",
     "prepare": "husky install",
-    "dev": "tsc && node lib/index.js"
+    "dev": "tsc && node bin/nexus.js",
+    "prepublishOnly": "rollup-type-bundler -e stream"
   },
   "repository": {
     "type": "git",
@@ -22,7 +29,11 @@
   "keywords": [
     "nexus",
     "discord",
-    "voice"
+    "voice",
+    "node",
+    "queue",
+    "music",
+    "player"
   ],
   "author": "Snowflake107",
   "license": "MIT",
@@ -31,6 +42,7 @@
   },
   "homepage": "https://github.com/DevSnowflake/Nexus#readme",
   "devDependencies": {
+    "@favware/rollup-type-bundler": "^1.0.2",
     "@types/cors": "^2.8.12",
     "@types/express": "^4.17.12",
     "@types/node": "^16.0.0",
@@ -54,6 +66,7 @@
     "commander": "^8.0.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "ffmpeg-static": "^4.4.0",
     "helmet": "^4.6.0",
     "libsodium-wrappers": "^0.7.9",
     "tiny-typed-emitter": "^2.0.3",
@@ -61,14 +74,7 @@
     "ws": "^7.5.2",
     "youtube-sr": "^4.1.7"
   },
-  "pkg": {
-    "scripts": "lib/**/*.js",
-    "assets": [
-      "node_modules/@discordjs/**",
-      "node_modules/libsodium-wrappers/**"
-    ],
-    "targets": [
-      "node14"
-    ]
+  "engines": {
+    "node": ">=v14.x"
   }
 }

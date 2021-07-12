@@ -1,4 +1,5 @@
-lib/
+dist/
+bin/
 .vscode/
 node_modules/
 package.json
