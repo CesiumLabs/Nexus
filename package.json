@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Simple and minimalistic audio node for Discord based on @discordjs/voice",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "preferGlobal": true,
   "bin": {
     "nexus": "bin/nexus.js"
