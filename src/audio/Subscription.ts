@@ -91,7 +91,10 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
 
                     this.audioResource = null;
                     if (nextTrack) this.playStream(nextTrack, true);
-                    else this.emit("stop");
+                    else {
+                        this.emit("stop");
+                        this.timer?.pause();
+                    }
                 }
             }
         });
