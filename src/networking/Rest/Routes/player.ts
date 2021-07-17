@@ -1,4 +1,3 @@
-import { AudioPlayerStatus } from "@discordjs/voice";
 import { Snowflake } from "discord-api-types";
 import { Router } from "express";
 import { Track } from "../../../audio/Track";
@@ -28,24 +27,16 @@ router.post("/:guildID", async (req, res) => {
         return res.status(404).json({ error: `subscription is not available for ${guildID}` });
     }
 
-    const tracks = req.body?.tracks as TrackInitOptions[];
-    if (!tracks || !tracks.length || !tracks.every((x) => x.url)) return res.status(400).json({ error: "track was not found in the request payload" });
-    const songs: Track[] = [];
+    const track = req.body?.track as TrackInitOptions;
+    if (!track || !track.url) return res.status(400).json({ error: "track was not found in the request payload" });
 
-    for (const track of tracks) {
-        const info = Util.isTrackFull(track) ? track : await Track.getInfo(track.url).catch(Util.noop);
-        if (!info || (info as { error: string }).error) return res.status(404).json({ error: "track not found" });
-
-        const song = new Track(info as TrackInitOptions);
-        songs.push(song);
-    }
+    const info = Util.isTrackFull(track) ? track : await Track.getInfo(track.url).catch(Util.noop);
+    if (!info || (info as { error: string }).error) return res.status(404).json({ error: "track not found" });
+    const song = new Track(info as TrackInitOptions);
 
     try {
-        res.json(songs.map((m) => m.toJSON()));
-        subscription.queue.addTracks(songs);
-
-        // play if player status is idle else just queue
-        if (subscription.audioPlayer.state.status === AudioPlayerStatus.Idle) subscription.playStream(subscription.queue.tracks.shift(), true);
+        res.status(204).send();
+        subscription.playStream(song);
     } catch {
         res.status(500).send({ error: "could not play the track" });
     }
@@ -159,13 +150,12 @@ router.get("/:guildID", (req, res) => {
     }
 
     return res.json({
-        current: subscription.queue.playing?.toJSON() ?? null,
+        current: subscription.audioResource?.metadata?.toJSON() ?? null,
         stream_time: subscription.streamTime,
         loop_mode: subscription.loopMode,
         volume: subscription.volume,
         paused: subscription.paused,
-        latency: subscription.voiceConnection.ping,
-        tracks: subscription.queue.tracks.map((m) => m.toJSON())
+        latency: subscription.voiceConnection.ping
     });
 });
 

@@ -15,7 +15,7 @@ export enum WSCloseCodes {
 export enum WSCloseMessage {
     UNKNOWN = "Unknown Error",
     NO_CLIENT_ID = "Missing client-id in request headers",
-    NO_AUTH = "Missing authorization in request headers",
+    NO_AUTH = "Missing or invalid authorization in request headers",
     NO_GUILD = "No guild available",
     DECODE_ERROR = "Invalid payload",
     UNKNOWN_OPCODE = "Unknown opcode",

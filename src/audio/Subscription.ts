@@ -2,7 +2,6 @@ import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, enter
 import { Util } from "../Utils/Util";
 import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Track } from "./Track";
-import { Queue } from "./Queue";
 import { Snowflake } from "discord-api-types";
 import type { Client } from "./Client";
 import { LoopMode, WSEvents } from "../Utils/Constants";
@@ -25,7 +24,6 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     private readyLock = false;
     public paused = false;
     public audioResource: AudioResource<Track> = null;
-    public queue = new Queue(this.voiceConnection.joinConfig.guildId as Snowflake, this);
     #lastVolume = 100;
     public loopMode = LoopMode.OFF;
     public timer: MiniTimer = null;
@@ -77,26 +75,11 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
             } else if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
                 if (!this.paused) {
                     void this.emit("finish", this.audioResource);
-                    const previousTrack = this.audioResource?.metadata;
-                    let nextTrack: Track;
-
-                    if (this.loopMode === LoopMode.OFF) {
-                        nextTrack = this.queue.tracks.shift();
-                    } else if (this.loopMode === LoopMode.TRACK) {
-                        nextTrack = this.audioResource.metadata;
-                    } else if (this.loopMode === LoopMode.QUEUE) {
-                        this.queue.addTrack(previousTrack);
-                        nextTrack = this.queue.tracks.shift();
-                    }
-
                     this.audioResource = null;
-                    if (nextTrack) this.playStream(nextTrack, true);
-                    else {
-                        this.emit("stop");
-                        this.timer?.pause();
-                        // sent status after pause (to get latest update)
-                        this.client.socket.send(this.createPlayerStatusPayload(), Util.noop);
-                    }
+                    this.emit("stop");
+                    this.timer?.pause();
+                    // sent status after pause (to get latest update)
+                    this.client.socket.send(this.createPlayerStatusPayload(), Util.noop);
                 }
             }
         });
@@ -115,7 +98,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
             this.timer?.clear();
             this.timer = null;
             this.audioPlayer.stop(true);
-            this.queue.tracks = [];
+            this.audioResource = null;
             this.voiceConnection.destroy();
         } catch {} // eslint-disable-line no-empty
     }
@@ -150,20 +133,16 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
         return this.audioResource.playbackDuration;
     }
 
-    async playStream(track: Track = this.queue.playing, play = false) {
+    async playStream(track: Track) {
         if (!track) throw new Error("Audio resource is not available!");
-
-        if (!play) {
-            this.queue.addTrack(track);
-            return this;
-        }
 
         if (this.voiceConnection.state.status !== VoiceConnectionStatus.Ready) {
             const entersStateResult = await entersState(this.voiceConnection, VoiceConnectionStatus.Ready, 60000).catch(() => null);
             if (entersStateResult === null) return this.client.kill(this.guildID);
         }
+
         const resource = this.createAudioResource(track);
-        if (!this.audioResource) this.audioResource = resource;
+        this.audioResource = resource;
         this.audioPlayer.play(resource);
         this.setVolume(this.#lastVolume);
 
@@ -190,8 +169,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
                 volume: this.volume,
                 paused: this.paused,
                 latency: this.voiceConnection?.ping ?? {},
-                current: this.queue.playing?.toJSON() || null,
-                queue: this.queue.tracks.map((m) => m.toJSON())
+                current: this.audioResource?.metadata?.toJSON() || null
             }
         });
     }
