@@ -4,7 +4,7 @@ import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Track } from "./Track";
 import { Snowflake } from "discord-api-types";
 import type { Client } from "./Client";
-import { LoopMode, WSEvents, FFmpegArgs } from "../Utils/Constants";
+import { WSEvents, FFmpegArgs } from "../Utils/Constants";
 import type MiniTimer from "../Utils/MiniTimer";
 import { FFmpeg } from "prism-media";
 import type { Readable } from "stream";
@@ -27,7 +27,6 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     public paused = false;
     public audioResource: AudioResource<Track> = null;
     public encoderArgs: string[] = [];
-    public loopMode = LoopMode.OFF;
     public timer: MiniTimer = null;
     public filtersUpdate = false;
     #lastVolume = 100;

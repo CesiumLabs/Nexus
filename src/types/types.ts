@@ -1,5 +1,3 @@
-import { LoopMode } from "../Utils/Constants";
-
 export interface NexusConstructOptions {
     server?: {
         host?: string;
@@ -33,6 +31,5 @@ export interface TrackInitOptions {
 export interface PlayerPatchData {
     paused?: boolean;
     volume?: number;
-    loop_mode?: LoopMode;
     encoder_args?: string[];
 }

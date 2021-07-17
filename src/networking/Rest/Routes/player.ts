@@ -2,7 +2,7 @@ import { Snowflake } from "discord-api-types";
 import { Router } from "express";
 import { Track } from "../../../audio/Track";
 import { PlayerPatchData, TrackInitOptions } from "../../../types/types";
-import { LoopMode, WSEvents } from "../../../Utils/Constants";
+import { WSEvents } from "../../../Utils/Constants";
 import { Util } from "../../../Utils/Util";
 import clients from "../../WebSocket/clients";
 
@@ -67,7 +67,6 @@ router.patch("/:guildID", (req, res) => {
         guild_id: guildID,
         volume: subscription.volume,
         paused: subscription.paused,
-        loop_mode: subscription.loopMode,
         encoder_args: subscription.encoderArgs
     };
 
@@ -79,12 +78,6 @@ router.patch("/:guildID", (req, res) => {
     if ("volume" in data) {
         const vol = parseInt(data.volume as unknown as string);
         if (oldState.volume !== vol && !isNaN(vol) && Number.isFinite(vol) && vol > 0) subscription.setVolume(vol);
-    }
-
-    if ("loop_mode" in data) {
-        if (Object.values(LoopMode).includes(data.loop_mode)) {
-            subscription.loopMode = data.loop_mode;
-        }
     }
 
     if ("encoder_args" in data) {
@@ -99,7 +92,6 @@ router.patch("/:guildID", (req, res) => {
             guild_id: guildID,
             volume: subscription.volume,
             paused: subscription.paused,
-            loop_mode: subscription.loopMode,
             encoder_args: subscription.encoderArgs
         }
     };
@@ -160,7 +152,6 @@ router.get("/:guildID", (req, res) => {
     return res.json({
         current: subscription.audioResource?.metadata?.toJSON() ?? null,
         stream_time: subscription.streamTime,
-        loop_mode: subscription.loopMode,
         volume: subscription.volume,
         paused: subscription.paused,
         latency: subscription.voiceConnection.ping
