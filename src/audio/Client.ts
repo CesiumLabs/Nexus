@@ -16,59 +16,63 @@ class Client {
     }
 
     public subscribe(guild: Snowflake, channel: Snowflake, deaf?: boolean) {
-        const connection = joinVoiceChannel({
-            channelId: channel,
-            guildId: guild,
-            selfDeaf: Boolean(deaf),
-            adapterCreator: (methods) => {
-                this.adapters.set(guild, methods);
+        return new Promise((resolve) => {
+            const connection = joinVoiceChannel({
+                channelId: channel,
+                guildId: guild,
+                selfDeaf: Boolean(deaf),
+                adapterCreator: (methods) => {
+                    this.adapters.set(guild, methods);
 
-                return {
-                    sendPayload: (data) => {
-                        this.socket.send(
-                            JSON.stringify({
-                                op: WSOpCodes.VOICE_STATE_UPDATE,
-                                d: data
-                            })
-                        );
+                    return {
+                        sendPayload: (data) => {
+                            this.socket.send(
+                                JSON.stringify({
+                                    op: WSOpCodes.VOICE_STATE_UPDATE,
+                                    d: data
+                                })
+                            );
 
-                        return true;
-                    },
-                    destroy: () => {
-                        this.adapters.delete(guild);
-                        this.subscriptions.delete(guild);
-                    }
-                };
-            }
-        });
-
-        entersState(connection, VoiceConnectionStatus.Ready, 60000)
-            .then((conn) => {
-                const subscription = new SubscriptionManager(conn, this, guild);
-                this.bindEvents(subscription, guild);
-                this.subscriptions.set(guild, subscription);
-                this.socket.send(
-                    JSON.stringify({
-                        t: WSEvents.VOICE_CONNECTION_READY,
-                        d: {
-                            guild_id: guild,
-                            ping: conn.ping
+                            return true;
+                        },
+                        destroy: () => {
+                            this.adapters.delete(guild);
+                            this.subscriptions.delete(guild);
                         }
-                    })
-                );
-            })
-            .catch((e) => {
-                connection.destroy();
-                this.socket.send(
-                    JSON.stringify({
-                        t: WSEvents.VOICE_CONNECTION_ERROR,
-                        d: {
-                            guild_id: guild,
-                            message: `${e.message || e}`
-                        }
-                    })
-                );
+                    };
+                }
             });
+
+            entersState(connection, VoiceConnectionStatus.Ready, 60000)
+                .then((conn) => {
+                    const subscription = new SubscriptionManager(conn, this, guild);
+                    this.bindEvents(subscription, guild);
+                    this.subscriptions.set(guild, subscription);
+                    this.socket.send(
+                        JSON.stringify({
+                            t: WSEvents.VOICE_CONNECTION_READY,
+                            d: {
+                                guild_id: guild,
+                                ping: conn.ping
+                            }
+                        })
+                    );
+                    resolve(true);
+                })
+                .catch((e) => {
+                    connection.destroy();
+                    this.socket.send(
+                        JSON.stringify({
+                            t: WSEvents.VOICE_CONNECTION_ERROR,
+                            d: {
+                                guild_id: guild,
+                                message: `${e.message || e}`
+                            }
+                        })
+                    );
+                    resolve(false);
+                });
+        });
     }
 
     kill(guild: Snowflake) {
@@ -131,38 +135,6 @@ class Client {
                         d: {
                             guild_id: guildID,
                             message: err.message || `${err}`
-                        }
-                    })
-                );
-            })
-            .on("trackAdd", (track) => {
-                this.socket.send(
-                    JSON.stringify({
-                        t: WSEvents.TRACK_ADD,
-                        d: {
-                            guild_id: guildID,
-                            track: track?.toJSON() || {}
-                        }
-                    })
-                );
-            })
-            .on("tracksAdd", (tracks) => {
-                this.socket.send(
-                    JSON.stringify({
-                        t: WSEvents.TRACKS_ADD,
-                        d: {
-                            guild_id: guildID,
-                            track: tracks?.map((m) => m.toJSON()) || []
-                        }
-                    })
-                );
-            })
-            .on("stop", () => {
-                this.socket.send(
-                    JSON.stringify({
-                        t: WSEvents.QUEUE_END,
-                        d: {
-                            guild_id: guildID
                         }
                     })
                 );

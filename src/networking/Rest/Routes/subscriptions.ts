@@ -30,7 +30,7 @@ router.get("/:guildID/:channelID", (req, res) => {
     });
 });
 
-router.post("/:guildID/:channelID", (req, res) => {
+router.post("/:guildID/:channelID", async (req, res) => {
     const { guildID, channelID } = req.params;
     const clientID = req.clientUserID;
     if (!clientID || !guildID || !channelID) {
@@ -47,10 +47,10 @@ router.post("/:guildID/:channelID", (req, res) => {
         return res.status(403).json({ error: `subscription is already available for ${guildID}` });
     }
 
-    client.subscribe(guildID as Snowflake, channelID as Snowflake, Boolean(req.query.self_deaf));
+    const success = await client.subscribe(guildID as Snowflake, channelID as Snowflake, Boolean(req.query.self_deaf));
 
     return res.status(201).json({
-        message: `subscription created for ${guildID}`
+        success
     });
 });
 

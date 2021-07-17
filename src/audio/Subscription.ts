@@ -15,9 +15,6 @@ export interface VoiceEvents {
     connectionError: (error: Error) => any;
     start: (resource: AudioResource<Track>) => any;
     finish: (resource: AudioResource<Track>) => any;
-    trackAdd: (track: Track) => any;
-    tracksAdd: (track: Track[]) => any;
-    stop: () => any;
     /* eslint-enable @typescript-eslint/no-explicit-any */
 }
 
@@ -29,7 +26,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     public encoderArgs: string[] = [];
     public timer: MiniTimer = null;
     public filtersUpdate = false;
-    #lastVolume = 100;
+    public lastVolume = 100;
 
     constructor(public readonly voiceConnection: VoiceConnection, public readonly client: Client, public readonly guildID: Snowflake) {
         super();
@@ -81,7 +78,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
                 if (!this.paused || !this.filtersUpdate) {
                     this.emit("finish", this.audioResource);
                     this.audioResource = null;
-                    this.emit("stop");
+                    this.encoderArgs = [];
                     this.timer?.pause();
                     // sent status after pause (to get latest update)
                     this.client.socket.send(this.createPlayerStatusPayload(), Util.noop);
@@ -123,12 +120,12 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     setVolume(value: number) {
         if (!this.audioResource || isNaN(value) || value < 0 || value > Infinity) return false;
         this.audioResource.volume.setVolumeLogarithmic(value / 100);
-        this.#lastVolume = value;
+        this.lastVolume = value;
         return true;
     }
 
     get volume() {
-        if (!this.audioResource || !this.audioResource.volume) return this.#lastVolume ?? 100;
+        if (!this.audioResource || !this.audioResource.volume) return this.lastVolume ?? 100;
         const currentVol = this.audioResource.volume.volume;
         return Math.round(Math.pow(currentVol, 1 / 1.660964) * 100);
     }
@@ -150,9 +147,9 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
 
         const resource = this.createAudioResource(track);
         this.audioResource = resource;
-        this.audioPlayer.play(resource);
-        this.setVolume(this.#lastVolume);
         this.filtersUpdate = false;
+        this.audioPlayer.play(resource);
+        this.setVolume(this.lastVolume);
 
         return this;
     }
@@ -192,8 +189,8 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
 
     updateFFmpegStream() {
         if (!this.audioResource) return;
-        const stream = this.audioResource.metadata.createStream();
 
+        const stream = this.audioResource.metadata.createStream();
         const nextStream = this.createFFmpegStream(stream);
         const resource = createAudioResource(nextStream, {
             metadata: this.audioResource.metadata,
@@ -201,10 +198,13 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
             inlineVolume: true
         });
 
-        this.filtersUpdate = true;
-        this.audioResource = resource;
-        this.audioPlayer.play(resource);
-        this.setVolume(this.#lastVolume);
+        // buffering timeout
+        setTimeout(() => {
+            this.filtersUpdate = true;
+            this.audioResource = resource;
+            this.audioPlayer.play(resource);
+            this.setVolume(this.lastVolume);
+        }, 3000);
     }
 
     createPlayerStatusPayload() {

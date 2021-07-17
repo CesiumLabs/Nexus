@@ -19,8 +19,8 @@ class Track {
             {
                 o: "-",
                 q: "",
-                f: "bestaudio[ext=webm+acodec=opus+asr=48000]/bestaudio",
-                r: "100K"
+                f: "bestaudio/best",
+                noPlaylist: true
             },
             {
                 stdio: ["ignore", "pipe", "ignore"]

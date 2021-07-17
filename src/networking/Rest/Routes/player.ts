@@ -30,13 +30,22 @@ router.post("/:guildID", async (req, res) => {
     const track = req.body?.track as TrackInitOptions;
     if (!track || !track.url) return res.status(400).json({ error: "track was not found in the request payload" });
 
+    const playerConfig = req.body?.config ?? {
+        encoder_args: subscription.encoderArgs,
+        volume: subscription.volume
+    };
+
+    if (!Array.isArray(playerConfig.encoder_args)) playerConfig.encoderArgs = subscription.encoderArgs;
+
     const info = Util.isTrackFull(track) ? track : await Track.getInfo(track.url).catch(Util.noop);
     if (!info || (info as { error: string }).error) return res.status(404).json({ error: "track not found" });
     const song = new Track(info as TrackInitOptions);
 
     try {
-        res.status(204).send();
+        if ("encoder_args" in playerConfig) subscription.encoderArgs = playerConfig.encoder_args;
+        if ("volume" in playerConfig) subscription.lastVolume = playerConfig.volume;
         subscription.playStream(song);
+        res.status(204).send();
     } catch {
         res.status(500).send({ error: "could not play the track" });
     }
