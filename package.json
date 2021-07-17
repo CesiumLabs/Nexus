@@ -35,7 +35,10 @@
     "node",
     "queue",
     "music",
-    "player"
+    "player",
+    "reflect-nexus",
+    "voicelink",
+    "lavalink"
   ],
   "author": "Snowflake107",
   "license": "MIT",
