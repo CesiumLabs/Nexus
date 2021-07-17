@@ -67,7 +67,8 @@ router.patch("/:guildID", (req, res) => {
         guild_id: guildID,
         volume: subscription.volume,
         paused: subscription.paused,
-        loop_mode: subscription.loopMode
+        loop_mode: subscription.loopMode,
+        encoder_args: subscription.encoderArgs
     };
 
     if ("paused" in data) {
@@ -86,13 +87,20 @@ router.patch("/:guildID", (req, res) => {
         }
     }
 
+    if ("encoder_args" in data) {
+        subscription.filtersUpdate = true;
+        subscription.encoderArgs = data.encoder_args.length ? data.encoder_args : [];
+        subscription.updateFFmpegStream();
+    }
+
     const payloadData = {
         old_state: oldState,
         new_state: {
             guild_id: guildID,
             volume: subscription.volume,
             paused: subscription.paused,
-            loop_mode: subscription.loopMode
+            loop_mode: subscription.loopMode,
+            encoder_args: subscription.encoderArgs
         }
     };
 

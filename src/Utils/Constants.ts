@@ -59,3 +59,5 @@ export enum KnownSearchSource {
     SOUNDCLOUD = "scsearch",
     YOUTUBE_PLAYLIST = "ytplaylist"
 }
+
+export const FFmpegArgs: string[] = ["-analyzeduration", "0", "-loglevel", "0", "-f", "s16le", "-ar", "48000", "-ac", "2"];

@@ -34,4 +34,5 @@ export interface PlayerPatchData {
     paused?: boolean;
     volume?: number;
     loop_mode?: LoopMode;
+    encoder_args?: string[];
 }

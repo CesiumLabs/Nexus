@@ -4,8 +4,10 @@ import { TypedEmitter as EventEmitter } from "tiny-typed-emitter";
 import { Track } from "./Track";
 import { Snowflake } from "discord-api-types";
 import type { Client } from "./Client";
-import { LoopMode, WSEvents } from "../Utils/Constants";
+import { LoopMode, WSEvents, FFmpegArgs } from "../Utils/Constants";
 import type MiniTimer from "../Utils/MiniTimer";
+import { FFmpeg } from "prism-media";
+import type { Readable } from "stream";
 
 export interface VoiceEvents {
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -24,10 +26,11 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     private readyLock = false;
     public paused = false;
     public audioResource: AudioResource<Track> = null;
-    #lastVolume = 100;
+    public encoderArgs: string[] = [];
     public loopMode = LoopMode.OFF;
     public timer: MiniTimer = null;
     public filtersUpdate = false;
+    #lastVolume = 100;
 
     constructor(public readonly voiceConnection: VoiceConnection, public readonly client: Client, public readonly guildID: Snowflake) {
         super();
@@ -71,10 +74,13 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
                     }, this.client.statusUpdateInterval);
                     this.timer.start();
                 } else if (this.timer?.paused) this.timer.resume();
-                if (!this.paused) return void this.emit("start", this.audioResource);
+
+                if (oldState.status === AudioPlayerStatus.Paused || this.filtersUpdate) return;
+                this.emit("start", this.audioResource);
+                this.filtersUpdate = false;
             } else if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
-                if (!this.paused) {
-                    void this.emit("finish", this.audioResource);
+                if (!this.paused || !this.filtersUpdate) {
+                    this.emit("finish", this.audioResource);
                     this.audioResource = null;
                     this.emit("stop");
                     this.timer?.pause();
@@ -130,7 +136,9 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
 
     get streamTime() {
         if (!this.audioResource) return 0;
-        return this.audioResource.playbackDuration;
+
+        const duration = this.audioResource.playbackDuration;
+        return duration;
     }
 
     async playStream(track: Track) {
@@ -145,6 +153,7 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
         this.audioResource = resource;
         this.audioPlayer.play(resource);
         this.setVolume(this.#lastVolume);
+        this.filtersUpdate = false;
 
         return this;
     }
@@ -152,11 +161,51 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
     createAudioResource(track: Track): AudioResource<Track> {
         const stream = track.createStream();
 
-        return createAudioResource(stream, {
+        return createAudioResource(this.createFFmpegStream(stream), {
             metadata: track,
             inlineVolume: true,
-            inputType: StreamType.Arbitrary
+            inputType: StreamType.Raw
         });
+    }
+
+    createFFmpegStream(stream: Readable) {
+        const transcoder = new FFmpeg({
+            args: [...FFmpegArgs, ...this.encoderArgs],
+            shell: false
+        });
+
+        transcoder.on("close", () => {
+            transcoder.destroy();
+        });
+
+        transcoder.on("error", () => {
+            transcoder.destroy();
+        });
+
+        const output = stream.pipe(transcoder);
+
+        output.on("error", () => {
+            if (!transcoder.destroyed) transcoder.destroy();
+        });
+
+        return output;
+    }
+
+    updateFFmpegStream() {
+        if (!this.audioResource) return;
+        const stream = this.audioResource.metadata.createStream();
+
+        const nextStream = this.createFFmpegStream(stream);
+        const resource = createAudioResource(nextStream, {
+            metadata: this.audioResource.metadata,
+            inputType: StreamType.Raw,
+            inlineVolume: true
+        });
+
+        this.filtersUpdate = true;
+        this.audioResource = resource;
+        this.audioPlayer.play(resource);
+        this.setVolume(this.#lastVolume);
     }
 
     createPlayerStatusPayload() {
