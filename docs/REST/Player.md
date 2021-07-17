@@ -11,13 +11,13 @@ Play/add to queue. If **[full track object](https://github.com/DevSnowflake/Nexu
 ```ts
 /* BODY */
 interface {
-    tracks: [
-        {
-            url: string;
-            initial?: boolean; // if this track needs to be pushed at index 0, defaults to false
-        },
-        ...
-    ]
+    track: {
+        url: string;
+        config?: {
+            encoder_args?: string[];
+            volume?: number;
+        }
+    }
 }
 ```
 
@@ -29,8 +29,8 @@ Modify player (eg: updating loop mode, volume etc.). Returns `204` empty respons
 interface {
     data: {
         paused?: boolean;
-        loop_mode?: 0 | 1 | 2;
         volume?: number;
+        encoder_args?: string[];
     }
 }
 ```
