@@ -152,6 +152,7 @@ router.get("/:guildID", (req, res) => {
     return res.json({
         current: subscription.audioResource?.metadata?.toJSON() ?? null,
         stream_time: subscription.streamTime,
+        encoder_args: subscription.encoderArgs,
         volume: subscription.volume,
         paused: subscription.paused,
         latency: subscription.voiceConnection.ping
