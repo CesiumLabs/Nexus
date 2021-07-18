@@ -17,7 +17,7 @@ class RESTServer {
         this.app.use(express.urlencoded({ extended: true }));
         this.attachMiddleware();
     }
-    
+
     private attachMiddleware() {
         this.app.use(cors());
         this.app.use(
@@ -25,7 +25,7 @@ class RESTServer {
                 contentSecurityPolicy: false
             })
         );
-            
+
         this.app.use((req, res, next) => {
             res.setHeader("X-Powered-By", "nexus");
 
