@@ -184,6 +184,8 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
             if (!transcoder.destroyed) transcoder.destroy();
         });
 
+        this.encoderArgs = [];
+
         return output;
     }
 
