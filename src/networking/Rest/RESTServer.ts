@@ -15,10 +15,9 @@ class RESTServer {
     constructor(public readonly blockedIP: string[] = []) {
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
-        this.app.set("x-powered-by", "nexus");
         this.attachMiddleware();
     }
-
+    
     private attachMiddleware() {
         this.app.use(cors());
         this.app.use(
@@ -26,8 +25,10 @@ class RESTServer {
                 contentSecurityPolicy: false
             })
         );
-
+            
         this.app.use((req, res, next) => {
+            res.setHeader("X-Powered-By", "nexus");
+
             if (this.blockedIP?.includes((req.headers["x-forwarded-for"] || req.socket.remoteAddress) as string)) {
                 this.debug(`[${req.method.toUpperCase()}] ${req.path} - Request from blocked ip`);
                 return res.status(403).send({ error: "you are not allowed to connect" });
