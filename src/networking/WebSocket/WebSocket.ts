@@ -75,7 +75,7 @@ class WebSocket {
             return ws.close(WSCloseCodes.DECODE_ERROR, WSCloseMessage.DECODE_ERROR);
         }
 
-        if (message.op === 10) {
+        if (message.op === WSOpCodes.IDENTIFY) {
             this.debug(`${this.getID(ws)} sent identification payload`);
             if (clients.has(this.getID(ws))) {
                 this.debug(`Closed connection for ${this.getID(ws)} for sending identification twice`);
@@ -99,6 +99,17 @@ class WebSocket {
         if (!client) {
             this.debug(`Got payload from unidentified client ${this.getID(ws)}`);
             return ws.close(WSCloseCodes.NOT_IDENTIFIED, WSCloseMessage.NOT_IDENTIFIED);
+        }
+
+        if (message.op === WSOpCodes.PING) {
+            this.debug(`${this.getID(ws)} requested ping`);
+            this.send(ws, {
+                op: WSOpCodes.PONG,
+                d: {
+                    time: Date.now()
+                }
+            });
+            return this.debug(`PONG dispatched to ${this.getID(ws)}`);
         }
 
         switch (message.t) {
