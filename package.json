@@ -1,6 +1,6 @@
 {
   "name": "reflect-nexus",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Simple and minimalistic audio node for Discord based on @discordjs/voice",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
