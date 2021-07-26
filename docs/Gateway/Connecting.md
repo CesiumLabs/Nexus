@@ -38,7 +38,9 @@ You should store the `access_token` for future use. This `access_token` is neces
 enum WSOpCodes {
     HELLO = 0,
     VOICE_STATE_UPDATE = 1,
-    IDENTIFY = 10
+    IDENTIFY = 10,
+    PING = 11,
+    PONG = 12
 }
 ```
 
