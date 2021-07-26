@@ -107,7 +107,7 @@ router.patch("/:guildID", (req, res) => {
 
     subscription.client.socket.send(
         JSON.stringify({
-            t: WSEvents.QUEUE_STATE_UPDATE,
+            t: WSEvents.PLAYER_STATE_UPDATE,
             d: payloadData
         })
     );

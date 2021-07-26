@@ -35,7 +35,7 @@ interface {
 }
 ```
 
-> On using this, `QUEUE_STATE_UPDATE` event is dispatched!
+> On using this, `PLAYER_STATE_UPDATE` event is dispatched!
 
 ## DELETE /api/player/:guildId
 End current track
