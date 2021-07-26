@@ -61,6 +61,8 @@ enum WSOpCodes {
 > });
 > ```
 
+> **Tip:** For servers like heroku, you can send `PING` payload to keep the connection alive.
+
 ## WebSocket Events
 
 ```ts
