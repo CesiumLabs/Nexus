@@ -16,7 +16,7 @@ class Client {
     }
 
     public subscribe(guild: Snowflake, channel: Snowflake, deaf?: boolean) {
-        return new Promise((resolve) => {
+        return new Promise<boolean>((resolve) => {
             const connection = joinVoiceChannel({
                 channelId: channel,
                 guildId: guild,
