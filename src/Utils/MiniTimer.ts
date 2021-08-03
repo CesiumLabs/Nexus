@@ -15,7 +15,7 @@ class MiniTimer {
     pause() {
         if (!this.paused) {
             this.clear();
-            this.remaining = new Date().getTime() - this.callbackStartTime;
+            this.remaining = Date.now() - this.callbackStartTime;
             this.paused = true;
         }
     }
@@ -27,7 +27,7 @@ class MiniTimer {
                     this.run();
                     this.paused = false;
                     this.start();
-                }, this.remaining);
+                }, this.remaining).unref();
             } else {
                 this.paused = false;
                 this.start();
@@ -43,7 +43,7 @@ class MiniTimer {
         this.clear();
         this.timerId = setInterval(() => {
             this.run();
-        }, this._delay);
+        }, this._delay).unref();
     }
 
     private run() {
