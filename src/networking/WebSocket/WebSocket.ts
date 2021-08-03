@@ -102,14 +102,13 @@ class WebSocket {
         }
 
         if (message.op === WSOpCodes.PING) {
-            this.debug(`${this.getID(ws)} requested ping`);
             this.send(ws, {
                 op: WSOpCodes.PONG,
                 d: {
                     time: Date.now()
                 }
             });
-            return this.debug(`PONG dispatched to ${this.getID(ws)}`);
+            return;
         }
 
         switch (message.t) {
