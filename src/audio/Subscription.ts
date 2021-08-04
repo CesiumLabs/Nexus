@@ -8,6 +8,7 @@ import { WSEvents, FFmpegArgs } from "../Utils/Constants";
 import type MiniTimer from "../Utils/MiniTimer";
 import { FFmpeg } from "prism-media";
 import type { Readable } from "stream";
+import wsclients from "../networking/WebSocket/clients";
 
 export interface VoiceEvents {
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -219,7 +220,12 @@ class SubscriptionManager extends EventEmitter<VoiceEvents> {
                 volume: this.volume,
                 paused: this.paused,
                 latency: this.voiceConnection?.ping ?? {},
-                current: this.audioResource?.metadata?.toJSON() || null
+                current: this.audioResource?.metadata?.toJSON() || null,
+                subscribers: {
+                    self_subscription_count: this.client.subscriptions.size,
+                    total_subscription_count: wsclients.reduce((a, c) => a + c.subscriptions.size, 0),
+                    connected: wsclients.size
+                }
             }
         });
     }
