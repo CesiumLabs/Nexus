@@ -50,7 +50,8 @@ router.post("/:guildID/:channelID", async (req, res) => {
     const success = await client.subscribe(guildID as Snowflake, channelID as Snowflake, Boolean(req.query.self_deaf));
 
     return res.status(201).json({
-        success
+        success,
+        subscription_count: client.subscriptions.size
     });
 });
 
@@ -76,7 +77,7 @@ router.delete("/:guildID/:channelID", (req, res) => {
 
     client.subscriptions.delete(guildID as Snowflake);
 
-    return res.status(204).json();
+    return res.status(200).json({ subscription_count: client.subscriptions.size });
 });
 
 export default router;
